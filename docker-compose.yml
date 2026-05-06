@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: ielts-postgres
+    environment:
+      POSTGRES_DB: ielts_db
+      POSTGRES_USER: ${PG_USER:-ielts_user}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?PG_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ielts-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${PG_USER:-ielts_user}", "-d", "ielts_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: kb-ielts
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ielts_db
+      SPRING_DATASOURCE_USERNAME: ${PG_USER:-ielts_user}
+      SPRING_DATASOURCE_PASSWORD: ${PG_PASSWORD}
+    networks:
+      - ielts-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  ielts-network:
+    name: ielts-network
+    driver: bridge
