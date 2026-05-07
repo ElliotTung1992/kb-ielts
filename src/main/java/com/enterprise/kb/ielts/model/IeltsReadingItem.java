@@ -25,8 +25,6 @@ public class IeltsReadingItem {
     private String questions;
     /** 答案及定位解析 */
     private String answers;
-    /** 文章核心词汇及释义 */
-    private String keyVocabulary;
     /** 该题型阅读技巧 */
     private String tips;
     /** 话题标签，逗号分隔 */

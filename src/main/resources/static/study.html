@@ -219,7 +219,6 @@ function renderCard(type, c, record) {
         case 'SPEAKING':
             front = c.question || c.title;
             back = c.referenceAnswer;
-            example = c.keyVocabulary;
             break;
         case 'LISTENING':
             front = c.title;
@@ -247,22 +246,19 @@ function renderCard(type, c, record) {
     renderLinkedItems(record.linkedItems);
 }
 
-const LINK_TYPE_ZH = {
-    vocabulary: '词汇', paraphrase: '同义替换', grammar: '语法', pronunciation: '发音', signal: '信号词'
-};
 const TARGET_TYPE_ZH = {
-    WORD: '单词', PHRASE: '短语', PARAPHRASE: '同义替换', PRONUNCIATION: '发音要点', GRAMMAR_POINT: '语法要点'
+    WORD: '词汇', PHRASE: '短语', PARAPHRASE: '同义替换', PRONUNCIATION: '发音', GRAMMAR_POINT: '语法要点'
 };
 
 function renderLinkedItems(links) {
     const el = document.getElementById('cardLinkedItems');
     if (!links || !links.length) { el.innerHTML = ''; return; }
-    // 按 linkType 分组
+    // 按 targetType 分组
     const groups = {};
-    links.forEach(l => { const g = LINK_TYPE_ZH[l.linkType] || l.linkType || '关联'; if (!groups[g]) groups[g] = []; groups[g].push(l); });
+    links.forEach(l => { const g = l.targetType || 'WORD'; if (!groups[g]) groups[g] = []; groups[g].push(l); });
     el.innerHTML = `<hr class="my-2"><div class="text-secondary fw-semibold" style="font-size:0.8em">相关内容</div>` +
-        Object.entries(groups).map(([label, items]) =>
-            `<div class="mt-1 small"><span class="text-muted">${escHtml(label)}：</span>` +
+        Object.entries(groups).map(([type, items]) =>
+            `<div class="mt-1 small"><span class="text-muted">${escHtml(TARGET_TYPE_ZH[type] || type)}：</span>` +
             items.map(l => `<span class="badge bg-light text-dark me-1">${escHtml(l.targetSummary||'')}</span>`).join('') +
             `</div>`
         ).join('');

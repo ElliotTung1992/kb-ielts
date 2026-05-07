@@ -9,7 +9,7 @@
 
     <sql id="Base_Column_List">
         id, title, training_type, difficulty, passage_text, question_type,
-        questions, answers, key_vocabulary, tips, topic_tags, created_at, updated_at
+        questions, answers, tips, topic_tags, created_at, updated_at
     </sql>
 
     <sql id="Where_Clause">
@@ -50,9 +50,9 @@
 
     <insert id="insert" parameterType="com.enterprise.kb.ielts.model.IeltsReadingItem">
         INSERT INTO ielts_reading_items (id, title, training_type, difficulty, passage_text,
-            question_type, questions, answers, key_vocabulary, tips, topic_tags, created_at, updated_at)
+            question_type, questions, answers, tips, topic_tags, created_at, updated_at)
         VALUES (#{id,jdbcType=OTHER}, #{title}, #{trainingType}, #{difficulty}, #{passageText},
-            #{questionType}, #{questions}, #{answers}, #{keyVocabulary}, #{tips}, #{topicTags},
+            #{questionType}, #{questions}, #{answers}, #{tips}, #{topicTags},
             #{createdAt}, #{updatedAt})
     </insert>
 
@@ -65,7 +65,6 @@
             question_type = #{questionType},
             questions = #{questions},
             answers = #{answers},
-            key_vocabulary = #{keyVocabulary},
             tips = #{tips},
             topic_tags = #{topicTags},
             updated_at = #{updatedAt}
@@ -78,11 +77,11 @@
 
     <insert id="batchInsert">
         INSERT INTO ielts_reading_items (id, title, training_type, difficulty, passage_text,
-            question_type, questions, answers, key_vocabulary, tips, topic_tags, created_at, updated_at)
+            question_type, questions, answers, tips, topic_tags, created_at, updated_at)
         VALUES
         <foreach collection="list" item="r" separator=",">
             (#{r.id,jdbcType=OTHER}, #{r.title}, #{r.trainingType}, #{r.difficulty}, #{r.passageText},
-             #{r.questionType}, #{r.questions}, #{r.answers}, #{r.keyVocabulary}, #{r.tips},
+             #{r.questionType}, #{r.questions}, #{r.answers}, #{r.tips},
              #{r.topicTags}, #{r.createdAt}, #{r.updatedAt})
         </foreach>
     </insert>

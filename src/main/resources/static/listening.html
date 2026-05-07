@@ -63,6 +63,7 @@
         <div class="col-md-6"><label class="form-label">作答技巧</label><textarea class="form-control" id="fTips" rows="2"></textarea></div>
         <div class="col-md-6"><label class="form-label">话题标签</label><input class="form-control" id="fTopics"></div>
       </div>
+      <div id="modalLinksContainer"></div>
     </div>
     <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" onclick="save()">保存</button></div>
   </div></div>
@@ -74,53 +75,6 @@
     <div class="modal-body"><textarea class="form-control font-monospace" id="importJson" rows="12" placeholder='[{"title":"Library Registration","section":1,"questionType":"form-completion","difficulty":1}]'></textarea></div>
     <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" onclick="doImport()">导入</button></div>
   </div></div>
-</div>
-
-<!-- 关联管理 Offcanvas -->
-<div class="offcanvas offcanvas-end" style="width:420px" tabindex="-1" id="linksOffcanvas">
-  <div class="offcanvas-header border-bottom">
-    <h6 class="offcanvas-title" id="linksTitle">关联内容</h6>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body d-flex flex-column gap-3">
-    <!-- 添加关联 -->
-    <div class="border rounded p-2 bg-light">
-      <div class="fw-semibold small mb-2">添加关联</div>
-      <div class="mb-2">
-        <label class="form-label form-label-sm mb-1">内容类型</label>
-        <select class="form-select form-select-sm" id="linkTargetType" onchange="document.getElementById('linkSearch').value='';document.getElementById('linkSearchResults').innerHTML=''">
-          <option value="WORD">单词</option>
-          <option value="PHRASE">短语</option>
-          <option value="PARAPHRASE">同义替换</option>
-          <option value="PRONUNCIATION">发音要点</option>
-          <option value="GRAMMAR_POINT">语法要点</option>
-        </select>
-      </div>
-      <div class="mb-2 position-relative">
-        <label class="form-label form-label-sm mb-1">搜索</label>
-        <input class="form-control form-control-sm" id="linkSearch" placeholder="输入关键词搜索" oninput="LinksPanel.onSearchInput()">
-        <div id="linkSearchResults" class="list-group position-absolute w-100" style="z-index:1000;top:100%"></div>
-      </div>
-      <div id="selectedTargetInfo" class="mb-2 min-height-1"></div>
-      <div class="mb-2">
-        <label class="form-label form-label-sm mb-1">关联类型</label>
-        <select class="form-select form-select-sm" id="linkType">
-          <option value="vocabulary">词汇</option>
-          <option value="paraphrase">同义替换考点</option>
-          <option value="signal">信号词</option>
-          <option value="pronunciation">发音规律</option>
-          <option value="grammar">语法应用</option>
-        </select>
-      </div>
-      <div class="mb-2">
-        <label class="form-label form-label-sm mb-1">备注</label>
-        <input class="form-control form-control-sm" id="linkNote" placeholder="如：第3题同义替换考点">
-      </div>
-      <button class="btn btn-primary btn-sm w-100" onclick="LinksPanel.addLink()">添加</button>
-    </div>
-    <!-- 已关联列表 -->
-    <div id="linksList"></div>
-  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -141,19 +95,17 @@ async function loadPage(page=1) {
       <td><span class="badge bg-light text-dark">${escHtml(i.questionType||'-')}</span></td>
       <td>${diffBadge(i.difficulty)}</td>
       <td><button class="btn btn-sm btn-outline-primary me-1" onclick='edit(${JSON.stringify(i)})'><i class="bi bi-pencil"></i></button>
-        <button class="btn btn-sm btn-outline-secondary me-1" onclick="openLinks('${i.id}','${escHtml(i.title)}')" title="关联内容"><i class="bi bi-link-45deg"></i></button>
         <button class="btn btn-sm btn-outline-success me-1" onclick="startStudy('LISTENING','${i.id}')"><i class="bi bi-play"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="remove('${i.id}')"><i class="bi bi-trash"></i></button></td></tr>`).join('');
     document.getElementById('pagination').innerHTML=Array.from({length:data.totalPages},(_,i2)=>`<li class="page-item${i2+1===data.page+1?' active':''}"><a class="page-link" href="#" onclick="loadPage(${i2+1});return false">${i2+1}</a></li>`).join('');
 }
 
-function openAdd(){editId=null;document.getElementById('modalTitle').textContent='添加听力练习';['fTitle','fContext','fScript','fQuestions','fAnswers','fTips','fTopics'].forEach(id=>document.getElementById(id).value='');document.getElementById('fSect').value='1';document.getElementById('fQT').value='form-completion';document.getElementById('fDiffEdit').value='1';editModal.show();}
+function openAdd(){editId=null;document.getElementById('modalTitle').textContent='添加听力练习';['fTitle','fContext','fScript','fQuestions','fAnswers','fTips','fTopics'].forEach(id=>document.getElementById(id).value='');document.getElementById('fSect').value='1';document.getElementById('fQT').value='form-completion';document.getElementById('fDiffEdit').value='1';LinksPanel.initInline(TYPE,null,'modalLinksContainer');editModal.show();}
 function openImport(){importModal.show();}
-function edit(item){editId=item.id;document.getElementById('modalTitle').textContent='编辑听力练习';document.getElementById('fTitle').value=item.title||'';document.getElementById('fSect').value=item.section||1;document.getElementById('fQT').value=item.questionType||'form-completion';document.getElementById('fContext').value=item.contextDescription||'';document.getElementById('fScript').value=item.scriptExcerpt||'';document.getElementById('fQuestions').value=item.questions||'';document.getElementById('fAnswers').value=item.answers||'';document.getElementById('fTips').value=item.tips||'';document.getElementById('fDiffEdit').value=item.difficulty||1;document.getElementById('fTopics').value=item.topicTags||'';editModal.show();}
-async function save(){const body={title:document.getElementById('fTitle').value.trim(),section:parseInt(document.getElementById('fSect').value),questionType:document.getElementById('fQT').value,contextDescription:document.getElementById('fContext').value.trim()||null,scriptExcerpt:document.getElementById('fScript').value.trim()||null,questions:document.getElementById('fQuestions').value.trim()||null,answers:document.getElementById('fAnswers').value.trim()||null,tips:document.getElementById('fTips').value.trim()||null,difficulty:parseInt(document.getElementById('fDiffEdit').value),topicTags:document.getElementById('fTopics').value.trim()||null};try{if(editId)await Api.update(TYPE,editId,body);else await Api.create(TYPE,body);editModal.hide();showToast(editId?'更新成功':'添加成功');loadPage(currentPage);}catch(e){showToast(e.message,'danger');}}
+function edit(item){editId=item.id;document.getElementById('modalTitle').textContent='编辑听力练习';document.getElementById('fTitle').value=item.title||'';document.getElementById('fSect').value=item.section||1;document.getElementById('fQT').value=item.questionType||'form-completion';document.getElementById('fContext').value=item.contextDescription||'';document.getElementById('fScript').value=item.scriptExcerpt||'';document.getElementById('fQuestions').value=item.questions||'';document.getElementById('fAnswers').value=item.answers||'';document.getElementById('fTips').value=item.tips||'';document.getElementById('fDiffEdit').value=item.difficulty||1;document.getElementById('fTopics').value=item.topicTags||'';LinksPanel.initInline(TYPE,editId,'modalLinksContainer');editModal.show();}
+async function save(){const body={title:document.getElementById('fTitle').value.trim(),section:parseInt(document.getElementById('fSect').value),questionType:document.getElementById('fQT').value,contextDescription:document.getElementById('fContext').value.trim()||null,scriptExcerpt:document.getElementById('fScript').value.trim()||null,questions:document.getElementById('fQuestions').value.trim()||null,answers:document.getElementById('fAnswers').value.trim()||null,tips:document.getElementById('fTips').value.trim()||null,difficulty:parseInt(document.getElementById('fDiffEdit').value),topicTags:document.getElementById('fTopics').value.trim()||null};try{if(editId){await Api.update(TYPE,editId,body);editModal.hide();showToast('更新成功');loadPage(currentPage);}else{const created=await Api.create(TYPE,body);editId=created.id;document.getElementById('modalTitle').textContent='编辑听力练习';showToast('添加成功，可继续添加关联');loadPage(currentPage);LinksPanel.initInline(TYPE,editId,'modalLinksContainer');}}catch(e){showToast(e.message,'danger');}}
 async function remove(id){if(!confirm('确认删除？'))return;try{await Api.remove(TYPE,id);showToast('删除成功');loadPage(currentPage);}catch(e){showToast(e.message,'danger');}}
 async function startStudy(type,id){try{await Api.study.start(type,id);showToast('已加入学习计划');}catch(e){showToast(e.message,'danger');}}
-function openLinks(id,title){LinksPanel.open(TYPE,id,title);}
 async function doImport(){try{const arr=JSON.parse(document.getElementById('importJson').value.trim());const res=await Api.batchImport(TYPE,arr);importModal.hide();showToast(`成功导入 ${res.imported} 条`);loadPage(1);}catch(e){showToast('导入失败: '+e.message,'danger');}}
 
 loadPage(1).catch(e=>showToast('加载失败','danger'));

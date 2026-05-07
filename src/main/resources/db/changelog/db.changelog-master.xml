@@ -13,5 +13,7 @@
              relativeToChangelogFile="false"/>
     <include file="classpath:db/changelog/004-create-content-links.sql"
              relativeToChangelogFile="false"/>
+    <include file="classpath:db/changelog/005-drop-redundant-fields.sql"
+             relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

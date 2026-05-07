@@ -1,21 +1,20 @@
 /**
- * 关联管理 Offcanvas 通用逻辑（技能内容页复用）
+ * 关联管理通用逻辑（技能内容页复用）
  *
- * 使用方式：
- *   在页面底部添加 id="linksOffcanvas" 的 Offcanvas，
- *   引入本脚本后调用 LinksPanel.open(resource, id, title)
+ * Offcanvas 模式：LinksPanel.open(resource, id, title)
+ * 内嵌模式：     LinksPanel.initInline(resource, id, containerId)
  */
 const LinksPanel = (() => {
     let _resource = null, _id = null;
     let _offcanvas = null;
 
-    // link_type 分组展示标签
-    const LINK_TYPE_LABELS = {
-        vocabulary:    '词汇',
-        paraphrase:    '同义替换考点',
-        grammar:       '语法应用',
-        pronunciation: '发音规律',
-        signal:        '信号词',
+    // targetType 分组展示标签
+    const TARGET_TYPE_LABELS = {
+        WORD:          '词汇',
+        PHRASE:        '短语',
+        PARAPHRASE:    '同义替换',
+        PRONUNCIATION: '发音',
+        GRAMMAR_POINT: '语法要点',
     };
 
     // targetType 对应 resource 路径（用于搜索候选）
@@ -67,16 +66,16 @@ const LinksPanel = (() => {
             list.innerHTML = '<div class="text-muted small py-2">暂无关联内容</div>';
             return;
         }
-        // 按 linkType 分组
+        // 按 targetType 分组
         const groups = {};
         links.forEach(l => {
-            const g = l.linkType || 'vocabulary';
+            const g = l.targetType || 'WORD';
             if (!groups[g]) groups[g] = [];
             groups[g].push(l);
         });
         list.innerHTML = Object.entries(groups).map(([type, items]) => `
         <div class="mb-3">
-          <div class="fw-semibold text-secondary small mb-1">${LINK_TYPE_LABELS[type] || type} <span class="badge bg-secondary">${items.length}</span></div>
+          <div class="fw-semibold text-secondary small mb-1">${TARGET_TYPE_LABELS[type] || type} <span class="badge bg-secondary">${items.length}</span></div>
           ${items.map(l => `
           <div class="d-flex align-items-start border rounded p-2 mb-1 bg-light gap-2">
             <div class="flex-grow-1">
@@ -107,7 +106,6 @@ const LinksPanel = (() => {
         document.getElementById('linkTargetType').value = 'WORD';
         document.getElementById('linkSearch').value = '';
         document.getElementById('linkSearchResults').innerHTML = '';
-        document.getElementById('linkType').value = 'vocabulary';
         document.getElementById('linkNote').value = '';
         _selectedTarget = null;
         document.getElementById('selectedTargetInfo').innerHTML = '';
@@ -130,7 +128,6 @@ const LinksPanel = (() => {
     }
 
     function _searchParamFor(targetType) {
-        // 各跨技能内容的搜索字段
         const map = { WORD: 'word', PHRASE: 'phrase', PARAPHRASE: 'groupName', PRONUNCIATION: 'title', GRAMMAR_POINT: 'title' };
         return map[targetType] || 'title';
     }
@@ -158,7 +155,6 @@ const LinksPanel = (() => {
         const body = {
             targetType: document.getElementById('linkTargetType').value,
             targetId:   _selectedTarget,
-            linkType:   document.getElementById('linkType').value || null,
             note:       document.getElementById('linkNote').value.trim() || null,
         };
         try {
@@ -171,5 +167,50 @@ const LinksPanel = (() => {
         }
     }
 
-    return { open, removeLink, onSearchInput, selectTarget, addLink };
+    // ── 内嵌模式 ──────────────────────────────
+    function initInline(resource, id, containerId) {
+        _resource = resource;
+        _id = id;
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const enabled = id !== null;
+        container.innerHTML = `
+        <hr class="my-3">
+        <div class="fw-semibold mb-2 text-secondary small">── 关联内容 ──</div>
+        <div class="border rounded p-2 bg-light mb-2${enabled ? '' : ' opacity-50 pe-none'}">
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label class="form-label form-label-sm mb-1">内容类型</label>
+              <select class="form-select form-select-sm" id="linkTargetType" ${enabled ? '' : 'disabled'}
+                      onchange="document.getElementById('linkSearch').value='';document.getElementById('linkSearchResults').innerHTML=''">
+                <option value="WORD">单词</option>
+                <option value="PHRASE">短语</option>
+                <option value="PARAPHRASE">同义替换</option>
+                <option value="PRONUNCIATION">发音要点</option>
+                <option value="GRAMMAR_POINT">语法要点</option>
+              </select>
+            </div>
+            <div class="col-md-5 position-relative">
+              <label class="form-label form-label-sm mb-1">搜索</label>
+              <input class="form-control form-control-sm" id="linkSearch" placeholder="输入关键词搜索"
+                     ${enabled ? 'oninput="LinksPanel.onSearchInput()"' : 'disabled'}>
+              <div id="linkSearchResults" class="list-group position-absolute w-100" style="z-index:1060;top:100%"></div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label form-label-sm mb-1">备注</label>
+              <input class="form-control form-control-sm" id="linkNote" placeholder="补充说明" ${enabled ? '' : 'disabled'}>
+            </div>
+          </div>
+          <div id="selectedTargetInfo" class="mb-2"></div>
+          <button class="btn btn-primary btn-sm w-100" onclick="LinksPanel.addLink()" ${enabled ? '' : 'disabled'}>+ 添加</button>
+        </div>
+        ${enabled
+            ? '<div id="linksList"><div class="text-muted small py-2">加载中…</div></div>'
+            : '<div class="text-muted small text-center py-2 border rounded">保存后可在此添加关联</div>'}`;
+        if (enabled) {
+            _loadLinks();
+        }
+    }
+
+    return { open, removeLink, onSearchInput, selectTarget, addLink, initInline };
 })();

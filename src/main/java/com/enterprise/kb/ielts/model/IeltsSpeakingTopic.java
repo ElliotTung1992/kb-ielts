@@ -19,10 +19,6 @@ public class IeltsSpeakingTopic {
     private String question;
     /** 参考答案思路或范例 */
     private String referenceAnswer;
-    /** 话题高分词汇，换行分隔 */
-    private String keyVocabulary;
-    /** 话题常用句式，换行分隔 */
-    private String usefulPhrases;
     /** 难度（1基础 / 2中级 / 3高级） */
     private Integer difficulty;
     /** 话题标签，逗号分隔 */

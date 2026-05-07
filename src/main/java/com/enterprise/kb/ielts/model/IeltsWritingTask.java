@@ -27,8 +27,6 @@ public class IeltsWritingTask {
     private String modelAnswer;
     /** 高分答案评分要点 */
     private String bandScoreNote;
-    /** 该题型常用句式，换行分隔 */
-    private String keyPhrases;
     /** 难度（1基础 / 2中级 / 3高级） */
     private Integer difficulty;
     /** 话题标签，逗号分隔 */

@@ -43,7 +43,6 @@ public class IeltsContentLinkServiceImpl implements IeltsContentLinkService {
         link.setSourceId(sourceId);
         link.setTargetType(request.targetType());
         link.setTargetId(request.targetId());
-        link.setLinkType(request.linkType());
         link.setNote(request.note());
         link.setCreatedAt(Instant.now());
         try {

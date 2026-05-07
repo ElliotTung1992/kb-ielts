@@ -105,10 +105,10 @@
 
     <insert id="insert" parameterType="com.enterprise.kb.ielts.model.IeltsContentLink">
         INSERT INTO ielts_content_links
-            (id, source_type, source_id, target_type, target_id, link_type, note, created_at)
+            (id, source_type, source_id, target_type, target_id, note, created_at)
         VALUES
             (#{id,jdbcType=OTHER}, #{sourceType}, #{sourceId,jdbcType=OTHER},
-             #{targetType}, #{targetId,jdbcType=OTHER}, #{linkType}, #{note}, #{createdAt})
+             #{targetType}, #{targetId,jdbcType=OTHER}, #{note}, #{createdAt})
     </insert>
 
     <delete id="deleteById">
