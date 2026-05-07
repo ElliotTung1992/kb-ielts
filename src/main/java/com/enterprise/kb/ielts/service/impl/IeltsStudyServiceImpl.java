@@ -9,6 +9,7 @@ import com.enterprise.kb.ielts.dto.StudyStatsResponse;
 import com.enterprise.kb.ielts.dto.TodayPlanResponse;
 import com.enterprise.kb.ielts.mapper.*;
 import com.enterprise.kb.ielts.model.IeltsDailyPlan;
+import com.enterprise.kb.ielts.model.IeltsDailyPlanItem;
 import com.enterprise.kb.ielts.model.IeltsReviewLog;
 import com.enterprise.kb.ielts.model.IeltsStudyRecord;
 import com.enterprise.kb.ielts.service.IeltsStudyService;
@@ -36,6 +37,7 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
     private final IeltsStudyRecordMapper recordMapper;
     private final IeltsReviewLogMapper reviewLogMapper;
     private final IeltsDailyPlanMapper dailyPlanMapper;
+    private final IeltsDailyPlanItemMapper dailyPlanItemMapper;
     private final IeltsStudyConfig studyConfig;
     private final IeltsContentLinkMapper contentLinkMapper;
 
@@ -49,11 +51,20 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
     private final IeltsListeningItemMapper listeningItemMapper;
     private final IeltsReadingItemMapper readingItemMapper;
     private final IeltsWritingTaskMapper writingTaskMapper;
+    private final SpacedRepetitionCalculator repetitionCalculator;
 
     @Override
     @Transactional
     public TodayPlanResponse getTodayPlan() {
         LocalDate today = LocalDate.now();
+
+        IeltsDailyPlan plan = dailyPlanMapper.findByPlanDate(today).orElse(null);
+        if (plan != null && dailyPlanItemMapper.countByPlanId(plan.getId()) > 0) {
+            List<StudyPlanItem> persistedItems = dailyPlanItemMapper.findItemsByPlanId(plan.getId());
+            enrichLinkedItems(persistedItems);
+            syncPlanCounts(plan);
+            return new TodayPlanResponse(today, plan.getTotalItems(), plan.getCompletedItems(), persistedItems);
+        }
 
         // 1. 获取所有到期复习项（单条 JOIN 查询，带摘要）
         List<StudyPlanItem> reviewItems = recordMapper.findDueItemsWithSummary(today);
@@ -97,33 +108,28 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
         allItems.addAll(newItems);
 
         // 5. 为技能内容条目（听力/阅读/写作/口语）附带关联内容快照
-        java.util.Set<String> skillTypes = java.util.Set.of("LISTENING", "READING", "WRITING", "SPEAKING");
-        allItems.stream()
-                .filter(item -> skillTypes.contains(item.getContentType()))
-                .forEach(item -> {
-                    List<ContentLinkDto> links = contentLinkMapper.findBySource(
-                            item.getContentType(), item.getContentId());
-                    item.setLinkedItems(links);
-                });
+        enrichLinkedItems(allItems);
 
         // 7. 创建或更新今日计划记录
         int total = allItems.size();
-        boolean[] isNew = {false};
-        IeltsDailyPlan plan = dailyPlanMapper.findByPlanDate(today).orElseGet(() -> {
-            isNew[0] = true;
+        boolean isNewPlan = false;
+        if (plan == null) {
+            isNewPlan = true;
             IeltsDailyPlan newPlan = new IeltsDailyPlan();
             newPlan.setId(UUID.randomUUID());
             newPlan.setPlanDate(today);
             newPlan.setCompletedItems(0);
             newPlan.setGeneratedAt(Instant.now());
-            return newPlan;
-        });
+            plan = newPlan;
+        }
         plan.setTotalItems(total);
-        if (isNew[0]) {
+        plan.setCompletedItems(0);
+        if (isNewPlan) {
             dailyPlanMapper.insert(plan);
         } else {
             dailyPlanMapper.update(plan);
         }
+        savePlanItems(plan.getId(), allItems);
 
         return new TodayPlanResponse(today, plan.getTotalItems(), plan.getCompletedItems(), allItems);
     }
@@ -150,6 +156,10 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
     @Transactional
     public IeltsStudyRecord startStudying(String contentType, UUID contentId) {
         return recordMapper.findByContentTypeAndContentId(contentType, contentId)
+                .map(record -> {
+                    attachRecordToTodayPlan(contentType, contentId, record.getId());
+                    return record;
+                })
                 .orElseGet(() -> {
                     IeltsStudyRecord record = new IeltsStudyRecord();
                     record.setId(UUID.randomUUID());
@@ -163,6 +173,7 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
                     record.setLastReviewedAt(Instant.now());
                     record.setCreatedAt(Instant.now());
                     recordMapper.insert(record);
+                    attachRecordToTodayPlan(contentType, contentId, record.getId());
                     log.debug("新建学习记录: contentType={}, contentId={}", contentType, contentId);
                     return record;
                 });
@@ -174,9 +185,13 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
         IeltsStudyRecord record = recordMapper.findById(request.recordId())
                 .orElseThrow(() -> new ResourceNotFoundException("IeltsStudyRecord", request.recordId()));
 
+        ReviewSnapshot before = ReviewSnapshot.from(record);
+
         // 应用 SM-2 或简单切换
-        SpacedRepetitionCalculator.apply(record, request.rating());
+        repetitionCalculator.applyWithClock(record, request.rating());
         recordMapper.update(record);
+
+        ReviewSnapshot after = ReviewSnapshot.from(record);
 
         // 记录复习日志
         IeltsReviewLog reviewLog = new IeltsReviewLog();
@@ -184,10 +199,12 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
         reviewLog.setRecordId(record.getId());
         reviewLog.setRating(request.rating());
         reviewLog.setReviewedAt(Instant.now());
+        before.applyBefore(reviewLog);
+        after.applyAfter(reviewLog);
         reviewLogMapper.insert(reviewLog);
 
         // 更新今日计划完成数
-        updateTodayCompleted();
+        updateTodayCompleted(record);
 
         return record;
     }
@@ -205,12 +222,16 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
         return new StudyStatsResponse(total, learning, reviewing, mastered, todayReviews, streak);
     }
 
-    private void updateTodayCompleted() {
+    private void updateTodayCompleted(IeltsStudyRecord record) {
         LocalDate today = LocalDate.now();
         dailyPlanMapper.findByPlanDate(today).ifPresent(plan -> {
-            long todayReviews = reviewLogMapper.countByDate(today);
-            plan.setCompletedItems((int) Math.min(todayReviews, plan.getTotalItems()));
-            dailyPlanMapper.update(plan);
+            Instant completedAt = Instant.now();
+            int updated = dailyPlanItemMapper.markCompletedByRecordId(plan.getId(), record.getId(), completedAt);
+            if (updated == 0) {
+                dailyPlanItemMapper.markCompletedByContent(
+                        plan.getId(), record.getContentType(), record.getContentId(), record.getId(), completedAt);
+            }
+            syncPlanCounts(plan);
         });
     }
 
@@ -233,5 +254,83 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
             }
         }
         return streak;
+    }
+
+    private void enrichLinkedItems(List<StudyPlanItem> items) {
+        java.util.Set<String> skillTypes = java.util.Set.of("LISTENING", "READING", "WRITING", "SPEAKING");
+        items.stream()
+                .filter(item -> skillTypes.contains(item.getContentType()))
+                .forEach(item -> {
+                    List<ContentLinkDto> links = contentLinkMapper.findBySource(
+                            item.getContentType(), item.getContentId());
+                    item.setLinkedItems(links);
+                });
+    }
+
+    private void savePlanItems(UUID planId, List<StudyPlanItem> items) {
+        if (items.isEmpty()) {
+            return;
+        }
+        Instant now = Instant.now();
+        List<IeltsDailyPlanItem> planItems = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++) {
+            StudyPlanItem item = items.get(i);
+            IeltsDailyPlanItem planItem = new IeltsDailyPlanItem();
+            planItem.setId(UUID.randomUUID());
+            planItem.setPlanId(planId);
+            planItem.setContentType(item.getContentType());
+            planItem.setContentId(item.getContentId());
+            planItem.setRecordId(item.getRecordId());
+            planItem.setStudyMode(item.getStudyMode());
+            planItem.setStatus("PENDING");
+            planItem.setSummary(item.getSummary());
+            planItem.setSortOrder(i);
+            planItem.setCreatedAt(now);
+            planItems.add(planItem);
+        }
+        dailyPlanItemMapper.batchInsert(planItems);
+    }
+
+    private void attachRecordToTodayPlan(String contentType, UUID contentId, UUID recordId) {
+        dailyPlanMapper.findByPlanDate(LocalDate.now())
+                .ifPresent(plan -> dailyPlanItemMapper.updateRecordIdByContent(
+                        plan.getId(), contentType, contentId, recordId));
+    }
+
+    private void syncPlanCounts(IeltsDailyPlan plan) {
+        plan.setTotalItems(dailyPlanItemMapper.countByPlanId(plan.getId()));
+        plan.setCompletedItems(dailyPlanItemMapper.countCompletedByPlanId(plan.getId()));
+        dailyPlanMapper.update(plan);
+    }
+
+    private record ReviewSnapshot(
+            String status,
+            Integer intervalDays,
+            Integer repetitionCount,
+            java.math.BigDecimal easeFactor
+    ) {
+
+        static ReviewSnapshot from(IeltsStudyRecord record) {
+            return new ReviewSnapshot(
+                    record.getStatus(),
+                    record.getIntervalDays(),
+                    record.getRepetitionCount(),
+                    record.getEaseFactor()
+            );
+        }
+
+        void applyBefore(IeltsReviewLog log) {
+            log.setBeforeStatus(status);
+            log.setBeforeIntervalDays(intervalDays);
+            log.setBeforeRepetitionCount(repetitionCount);
+            log.setBeforeEaseFactor(easeFactor);
+        }
+
+        void applyAfter(IeltsReviewLog log) {
+            log.setAfterStatus(status);
+            log.setAfterIntervalDays(intervalDays);
+            log.setAfterRepetitionCount(repetitionCount);
+            log.setAfterEaseFactor(easeFactor);
+        }
     }
 }

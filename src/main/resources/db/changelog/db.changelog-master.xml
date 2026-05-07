@@ -15,5 +15,9 @@
              relativeToChangelogFile="false"/>
     <include file="classpath:db/changelog/005-drop-redundant-fields.sql"
              relativeToChangelogFile="false"/>
+    <include file="classpath:db/changelog/006-create-daily-plan-items.sql"
+             relativeToChangelogFile="false"/>
+    <include file="classpath:db/changelog/007-extend-review-logs.sql"
+             relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

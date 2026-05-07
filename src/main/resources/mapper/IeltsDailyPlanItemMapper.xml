@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.enterprise.kb.ielts.mapper.IeltsDailyPlanItemMapper">
+
+    <resultMap id="StudyPlanItemMap" type="com.enterprise.kb.ielts.dto.StudyPlanItem" autoMapping="true">
+        <result property="recordId" column="record_id" javaType="java.util.UUID" jdbcType="OTHER"/>
+        <result property="contentId" column="content_id" javaType="java.util.UUID" jdbcType="OTHER"/>
+    </resultMap>
+
+    <select id="findItemsByPlanId" resultMap="StudyPlanItemMap">
+        SELECT
+            record_id,
+            content_type,
+            content_id,
+            study_mode,
+            summary
+        FROM ielts_daily_plan_items
+        WHERE plan_id = #{planId,jdbcType=OTHER}
+          AND status != 'SKIPPED'
+        ORDER BY sort_order, created_at
+    </select>
+
+    <select id="countByPlanId" resultType="int">
+        SELECT COUNT(*)
+        FROM ielts_daily_plan_items
+        WHERE plan_id = #{planId,jdbcType=OTHER}
+          AND status != 'SKIPPED'
+    </select>
+
+    <select id="countCompletedByPlanId" resultType="int">
+        SELECT COUNT(*)
+        FROM ielts_daily_plan_items
+        WHERE plan_id = #{planId,jdbcType=OTHER}
+          AND status = 'COMPLETED'
+    </select>
+
+    <insert id="batchInsert">
+        INSERT INTO ielts_daily_plan_items (
+            id, plan_id, content_type, content_id, record_id, study_mode,
+            status, summary, sort_order, completed_at, created_at
+        )
+        VALUES
+        <foreach collection="items" item="item" separator=",">
+            (
+                #{item.id,jdbcType=OTHER},
+                #{item.planId,jdbcType=OTHER},
+                #{item.contentType},
+                #{item.contentId,jdbcType=OTHER},
+                #{item.recordId,jdbcType=OTHER},
+                #{item.studyMode},
+                #{item.status},
+                #{item.summary},
+                #{item.sortOrder},
+                #{item.completedAt},
+                #{item.createdAt}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateRecordIdByContent">
+        UPDATE ielts_daily_plan_items
+        SET record_id = #{recordId,jdbcType=OTHER}
+        WHERE plan_id = #{planId,jdbcType=OTHER}
+          AND content_type = #{contentType}
+          AND content_id = #{contentId,jdbcType=OTHER}
+          AND record_id IS NULL
+    </update>
+
+    <update id="markCompletedByRecordId">
+        UPDATE ielts_daily_plan_items
+        SET status = 'COMPLETED',
+            completed_at = #{completedAt}
+        WHERE plan_id = #{planId,jdbcType=OTHER}
+          AND record_id = #{recordId,jdbcType=OTHER}
+          AND status = 'PENDING'
+    </update>
+
+    <update id="markCompletedByContent">
+        UPDATE ielts_daily_plan_items
+        SET status = 'COMPLETED',
+            record_id = COALESCE(record_id, #{recordId,jdbcType=OTHER}),
+            completed_at = #{completedAt}
+        WHERE plan_id = #{planId,jdbcType=OTHER}
+          AND content_type = #{contentType}
+          AND content_id = #{contentId,jdbcType=OTHER}
+          AND status = 'PENDING'
+    </update>
+
+</mapper>

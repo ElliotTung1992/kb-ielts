@@ -9,12 +9,26 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, record_id, rating, reviewed_at
+        id, record_id, rating, before_status, after_status,
+        before_interval_days, after_interval_days,
+        before_repetition_count, after_repetition_count,
+        before_ease_factor, after_ease_factor, reviewed_at
     </sql>
 
     <insert id="insert" parameterType="com.enterprise.kb.ielts.model.IeltsReviewLog">
-        INSERT INTO ielts_review_logs (id, record_id, rating, reviewed_at)
-        VALUES (#{id,jdbcType=OTHER}, #{recordId,jdbcType=OTHER}, #{rating}, #{reviewedAt})
+        INSERT INTO ielts_review_logs (
+            id, record_id, rating, before_status, after_status,
+            before_interval_days, after_interval_days,
+            before_repetition_count, after_repetition_count,
+            before_ease_factor, after_ease_factor, reviewed_at
+        )
+        VALUES (
+            #{id,jdbcType=OTHER}, #{recordId,jdbcType=OTHER}, #{rating},
+            #{beforeStatus}, #{afterStatus},
+            #{beforeIntervalDays}, #{afterIntervalDays},
+            #{beforeRepetitionCount}, #{afterRepetitionCount},
+            #{beforeEaseFactor}, #{afterEaseFactor}, #{reviewedAt}
+        )
     </insert>
 
     <select id="findByRecordId" resultMap="BaseResultMap">
