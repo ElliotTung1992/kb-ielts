@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.enterprise.kb.ielts.mapper.IeltsContentLinkMapper">
+
+    <resultMap id="LinkResultMap" type="com.enterprise.kb.ielts.model.IeltsContentLink" autoMapping="true">
+        <id property="id" column="id" javaType="java.util.UUID" jdbcType="OTHER"/>
+    </resultMap>
+
+    <resultMap id="LinkDtoResultMap" type="com.enterprise.kb.ielts.dto.ContentLinkDto" autoMapping="true">
+        <id property="linkId" column="link_id" javaType="java.util.UUID" jdbcType="OTHER"/>
+        <result property="targetId"  column="target_id"  javaType="java.util.UUID" jdbcType="OTHER"/>
+        <result property="sourceId"  column="source_id"  javaType="java.util.UUID" jdbcType="OTHER"/>
+    </resultMap>
+
+    <select id="findById" resultMap="LinkResultMap">
+        SELECT id, source_type, source_id, target_type, target_id, link_type, note, created_at
+        FROM ielts_content_links
+        WHERE id = #{id,jdbcType=OTHER}
+    </select>
+
+    <!-- 正向查询：技能内容关联了哪些跨技能内容（含目标详情快照） -->
+    <select id="findBySource" resultMap="LinkDtoResultMap">
+        SELECT
+            cl.id            AS link_id,
+            cl.link_type,
+            cl.target_type,
+            cl.target_id,
+            cl.source_type,
+            cl.source_id,
+            cl.note,
+            cl.created_at,
+            CASE cl.target_type
+                WHEN 'WORD'         THEN w.word
+                WHEN 'PHRASE'       THEN p.phrase
+                WHEN 'PARAPHRASE'   THEN pg.core_expression
+                WHEN 'PRONUNCIATION' THEN pp.title
+                WHEN 'GRAMMAR_POINT' THEN gp.title
+            END AS target_summary,
+            CASE cl.target_type
+                WHEN 'WORD'         THEN w.definition_zh
+                WHEN 'PHRASE'       THEN p.meaning_zh
+                WHEN 'PARAPHRASE'   THEN pg.synonyms
+                WHEN 'PRONUNCIATION' THEN pp.category
+                WHEN 'GRAMMAR_POINT' THEN gp.category
+            END AS target_detail
+        FROM ielts_content_links cl
+        LEFT JOIN ielts_words w
+            ON cl.target_type = 'WORD' AND w.id = cl.target_id
+        LEFT JOIN ielts_phrases p
+            ON cl.target_type = 'PHRASE' AND p.id = cl.target_id
+        LEFT JOIN ielts_paraphrase_groups pg
+            ON cl.target_type = 'PARAPHRASE' AND pg.id = cl.target_id
+        LEFT JOIN ielts_pronunciation_points pp
+            ON cl.target_type = 'PRONUNCIATION' AND pp.id = cl.target_id
+        LEFT JOIN ielts_grammar_points gp
+            ON cl.target_type = 'GRAMMAR_POINT' AND gp.id = cl.target_id
+        WHERE cl.source_type = #{sourceType}
+          AND cl.source_id   = #{sourceId,jdbcType=OTHER}
+        ORDER BY cl.link_type, cl.created_at
+    </select>
+
+    <!-- 反向查询：跨技能内容被哪些技能内容引用（含来源详情快照） -->
+    <select id="findByTarget" resultMap="LinkDtoResultMap">
+        SELECT
+            cl.id            AS link_id,
+            cl.link_type,
+            cl.target_type,
+            cl.target_id,
+            cl.source_type,
+            cl.source_id,
+            cl.note,
+            cl.created_at,
+            CASE cl.source_type
+                WHEN 'LISTENING' THEN li.title
+                WHEN 'READING'   THEN ri.title
+                WHEN 'WRITING'   THEN wt.title
+                WHEN 'SPEAKING'  THEN st.title
+            END AS source_summary,
+            CASE cl.source_type
+                WHEN 'LISTENING' THEN CAST(li.section AS VARCHAR)
+                WHEN 'READING'   THEN ri.training_type
+                WHEN 'WRITING'   THEN CAST(wt.task_number AS VARCHAR)
+                WHEN 'SPEAKING'  THEN CAST(st.part AS VARCHAR)
+            END AS source_detail
+        FROM ielts_content_links cl
+        LEFT JOIN ielts_listening_items li
+            ON cl.source_type = 'LISTENING' AND li.id = cl.source_id
+        LEFT JOIN ielts_reading_items ri
+            ON cl.source_type = 'READING' AND ri.id = cl.source_id
+        LEFT JOIN ielts_writing_tasks wt
+            ON cl.source_type = 'WRITING' AND wt.id = cl.source_id
+        LEFT JOIN ielts_speaking_topics st
+            ON cl.source_type = 'SPEAKING' AND st.id = cl.source_id
+        WHERE cl.target_type = #{targetType}
+          AND cl.target_id   = #{targetId,jdbcType=OTHER}
+        ORDER BY cl.source_type, cl.created_at
+    </select>
+
+    <select id="countByTarget" resultType="int">
+        SELECT COUNT(*) FROM ielts_content_links
+        WHERE target_type = #{targetType}
+          AND target_id   = #{targetId,jdbcType=OTHER}
+    </select>
+
+    <insert id="insert" parameterType="com.enterprise.kb.ielts.model.IeltsContentLink">
+        INSERT INTO ielts_content_links
+            (id, source_type, source_id, target_type, target_id, link_type, note, created_at)
+        VALUES
+            (#{id,jdbcType=OTHER}, #{sourceType}, #{sourceId,jdbcType=OTHER},
+             #{targetType}, #{targetId,jdbcType=OTHER}, #{linkType}, #{note}, #{createdAt})
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM ielts_content_links WHERE id = #{id,jdbcType=OTHER}
+    </delete>
+
+    <delete id="deleteBySource">
+        DELETE FROM ielts_content_links
+        WHERE source_type = #{sourceType}
+          AND source_id   = #{sourceId,jdbcType=OTHER}
+    </delete>
+
+    <delete id="deleteByTarget">
+        DELETE FROM ielts_content_links
+        WHERE target_type = #{targetType}
+          AND target_id   = #{targetId,jdbcType=OTHER}
+    </delete>
+
+</mapper>
