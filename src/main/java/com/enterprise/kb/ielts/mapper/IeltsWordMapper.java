@@ -18,12 +18,13 @@ public interface IeltsWordMapper {
     List<IeltsWord> findAll(@Param("difficulty") Integer difficulty,
                             @Param("wordList") String wordList,
                             @Param("topicTags") String topicTags,
-                            @Param("studyStatus") String studyStatus);
+                            @Param("studyStatus") String studyStatus,
+                            @Param("keyword") String keyword);
 
     long countAll(@Param("difficulty") Integer difficulty,
                   @Param("wordList") String wordList,
                   @Param("topicTags") String topicTags,
-                            @Param("studyStatus") String studyStatus);
+                  @Param("studyStatus") String studyStatus);
 
     int insert(IeltsWord word);
 

@@ -2,6 +2,7 @@ package com.enterprise.kb.ielts.service.impl;
 
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.common.exception.ResourceNotFoundException;
+import com.enterprise.kb.ielts.mapper.IeltsContentLinkMapper;
 import com.enterprise.kb.ielts.mapper.IeltsListeningItemMapper;
 import com.enterprise.kb.ielts.model.IeltsListeningItem;
 import com.enterprise.kb.ielts.service.IeltsListeningItemService;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class IeltsListeningItemServiceImpl implements IeltsListeningItemService {
 
     private final IeltsListeningItemMapper itemMapper;
+    private final IeltsContentLinkMapper contentLinkMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -62,6 +64,7 @@ public class IeltsListeningItemServiceImpl implements IeltsListeningItemService 
     @Transactional
     public void delete(UUID id) {
         getById(id);
+        contentLinkMapper.deleteBySource("LISTENING", id);
         itemMapper.deleteById(id);
     }
 

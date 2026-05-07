@@ -2,6 +2,7 @@ package com.enterprise.kb.ielts.service.impl;
 
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.common.exception.ResourceNotFoundException;
+import com.enterprise.kb.ielts.mapper.IeltsContentLinkMapper;
 import com.enterprise.kb.ielts.mapper.IeltsExampleMapper;
 import com.enterprise.kb.ielts.mapper.IeltsPhraseMapper;
 import com.enterprise.kb.ielts.model.IeltsExample;
@@ -25,12 +26,13 @@ public class IeltsPhraseServiceImpl implements IeltsPhraseService {
 
     private final IeltsPhraseMapper phraseMapper;
     private final IeltsExampleMapper exampleMapper;
+    private final IeltsContentLinkMapper contentLinkMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<IeltsPhrase> listPhrases(Integer difficulty, String category, String topicTags, String studyStatus, int page, int size) {
+    public PageResponse<IeltsPhrase> listPhrases(Integer difficulty, String category, String topicTags, String studyStatus, String keyword, int page, int size) {
         PageHelper.startPage(page, size);
-        List<IeltsPhrase> list = phraseMapper.findAll(difficulty, category, topicTags, studyStatus);
+        List<IeltsPhrase> list = phraseMapper.findAll(difficulty, category, topicTags, studyStatus, keyword);
         return PageResponse.of(new PageInfo<>(list));
     }
 
@@ -72,6 +74,7 @@ public class IeltsPhraseServiceImpl implements IeltsPhraseService {
     @Transactional
     public void delete(UUID id) {
         phraseMapper.findById(id).orElseThrow(() -> new ResourceNotFoundException("IeltsPhrase", id));
+        contentLinkMapper.deleteByTarget(CONTENT_TYPE, id);
         exampleMapper.deleteByContent(CONTENT_TYPE, id);
         phraseMapper.deleteById(id);
     }

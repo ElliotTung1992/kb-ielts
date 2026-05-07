@@ -2,6 +2,7 @@ package com.enterprise.kb.ielts.service.impl;
 
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.common.exception.ResourceNotFoundException;
+import com.enterprise.kb.ielts.mapper.IeltsContentLinkMapper;
 import com.enterprise.kb.ielts.mapper.IeltsExampleMapper;
 import com.enterprise.kb.ielts.mapper.IeltsGrammarPointMapper;
 import com.enterprise.kb.ielts.model.IeltsExample;
@@ -25,12 +26,13 @@ public class IeltsGrammarPointServiceImpl implements IeltsGrammarPointService {
 
     private final IeltsGrammarPointMapper pointMapper;
     private final IeltsExampleMapper exampleMapper;
+    private final IeltsContentLinkMapper contentLinkMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<IeltsGrammarPoint> listPoints(Integer difficulty, String category, String topicTags, String studyStatus, int page, int size) {
+    public PageResponse<IeltsGrammarPoint> listPoints(Integer difficulty, String category, String topicTags, String studyStatus, String keyword, int page, int size) {
         PageHelper.startPage(page, size);
-        List<IeltsGrammarPoint> list = pointMapper.findAll(difficulty, category, topicTags, studyStatus);
+        List<IeltsGrammarPoint> list = pointMapper.findAll(difficulty, category, topicTags, studyStatus, keyword);
         return PageResponse.of(new PageInfo<>(list));
     }
 
@@ -72,6 +74,7 @@ public class IeltsGrammarPointServiceImpl implements IeltsGrammarPointService {
     @Transactional
     public void delete(UUID id) {
         pointMapper.findById(id).orElseThrow(() -> new ResourceNotFoundException("IeltsGrammarPoint", id));
+        contentLinkMapper.deleteByTarget(CONTENT_TYPE, id);
         exampleMapper.deleteByContent(CONTENT_TYPE, id);
         pointMapper.deleteById(id);
     }

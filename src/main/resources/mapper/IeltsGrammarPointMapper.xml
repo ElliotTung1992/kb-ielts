@@ -17,6 +17,7 @@
             <if test="difficulty != null">AND gp.difficulty = #{difficulty}</if>
             <if test="category != null and category != ''">AND gp.category = #{category}</if>
             <if test="topicTags != null and topicTags != ''">AND gp.topic_tags LIKE '%' || #{topicTags} || '%'</if>
+            <if test="keyword != null and keyword != ''">AND gp.title ILIKE '%' || #{keyword} || '%'</if>
             <if test="studyStatus != null and studyStatus != ''">
                 <choose>
                     <when test="studyStatus == 'NEW'">AND sr.id IS NULL</when>
@@ -33,7 +34,8 @@
     </select>
 
     <select id="findAll" resultMap="BaseResultMap">
-        SELECT gp.*, sr.status AS study_status
+        SELECT gp.*, sr.status AS study_status,
+               (SELECT COUNT(*) FROM ielts_content_links cl WHERE cl.target_type = 'GRAMMAR_POINT' AND cl.target_id = gp.id) AS link_count
         FROM ielts_grammar_points gp
         LEFT JOIN ielts_study_records sr ON sr.content_type = 'GRAMMAR_POINT' AND sr.content_id = gp.id
         <include refid="Where_Clause"/>

@@ -3,6 +3,7 @@ package com.enterprise.kb.ielts.service.impl;
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.common.exception.ResourceExistException;
 import com.enterprise.kb.common.exception.ResourceNotFoundException;
+import com.enterprise.kb.ielts.mapper.IeltsContentLinkMapper;
 import com.enterprise.kb.ielts.mapper.IeltsExampleMapper;
 import com.enterprise.kb.ielts.mapper.IeltsWordMapper;
 import com.enterprise.kb.ielts.model.IeltsExample;
@@ -26,12 +27,13 @@ public class IeltsWordServiceImpl implements IeltsWordService {
 
     private final IeltsWordMapper wordMapper;
     private final IeltsExampleMapper exampleMapper;
+    private final IeltsContentLinkMapper contentLinkMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<IeltsWord> listWords(Integer difficulty, String wordList, String topicTags, String studyStatus, int page, int size) {
+    public PageResponse<IeltsWord> listWords(Integer difficulty, String wordList, String topicTags, String studyStatus, String keyword, int page, int size) {
         PageHelper.startPage(page, size);
-        List<IeltsWord> list = wordMapper.findAll(difficulty, wordList, topicTags, studyStatus);
+        List<IeltsWord> list = wordMapper.findAll(difficulty, wordList, topicTags, studyStatus, keyword);
         return PageResponse.of(new PageInfo<>(list));
     }
 
@@ -78,6 +80,7 @@ public class IeltsWordServiceImpl implements IeltsWordService {
     @Transactional
     public void delete(UUID id) {
         wordMapper.findById(id).orElseThrow(() -> new ResourceNotFoundException("IeltsWord", id));
+        contentLinkMapper.deleteByTarget(CONTENT_TYPE, id);
         exampleMapper.deleteByContent(CONTENT_TYPE, id);
         wordMapper.deleteById(id);
     }

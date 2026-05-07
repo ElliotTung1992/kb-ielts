@@ -2,6 +2,7 @@ package com.enterprise.kb.ielts.service.impl;
 
 import com.enterprise.kb.common.exception.ResourceNotFoundException;
 import com.enterprise.kb.ielts.config.IeltsStudyConfig;
+import com.enterprise.kb.ielts.dto.ContentLinkDto;
 import com.enterprise.kb.ielts.dto.ReviewRequest;
 import com.enterprise.kb.ielts.dto.StudyPlanItem;
 import com.enterprise.kb.ielts.dto.StudyStatsResponse;
@@ -36,6 +37,7 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
     private final IeltsReviewLogMapper reviewLogMapper;
     private final IeltsDailyPlanMapper dailyPlanMapper;
     private final IeltsStudyConfig studyConfig;
+    private final IeltsContentLinkMapper contentLinkMapper;
 
     private final IeltsWordMapper wordMapper;
     private final IeltsPhraseMapper phraseMapper;
@@ -94,7 +96,17 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
         List<StudyPlanItem> allItems = new ArrayList<>(reviewItems);
         allItems.addAll(newItems);
 
-        // 5. 创建或更新今日计划记录
+        // 5. 为技能内容条目（听力/阅读/写作/口语）附带关联内容快照
+        java.util.Set<String> skillTypes = java.util.Set.of("LISTENING", "READING", "WRITING", "SPEAKING");
+        allItems.stream()
+                .filter(item -> skillTypes.contains(item.getContentType()))
+                .forEach(item -> {
+                    List<ContentLinkDto> links = contentLinkMapper.findBySource(
+                            item.getContentType(), item.getContentId());
+                    item.setLinkedItems(links);
+                });
+
+        // 7. 创建或更新今日计划记录
         int total = allItems.size();
         boolean[] isNew = {false};
         IeltsDailyPlan plan = dailyPlanMapper.findByPlanDate(today).orElseGet(() -> {

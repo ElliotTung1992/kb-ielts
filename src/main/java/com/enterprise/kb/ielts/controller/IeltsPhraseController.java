@@ -38,9 +38,10 @@ public class IeltsPhraseController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String topicTags,
             @RequestParam(required = false) String studyStatus,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.ok(phraseService.listPhrases(difficulty, category, topicTags, studyStatus, page, size));
+        return ApiResponse.ok(phraseService.listPhrases(difficulty, category, topicTags, studyStatus, keyword, page, size));
     }
 
     /**

@@ -17,6 +17,7 @@
             <if test="difficulty != null">AND w.difficulty = #{difficulty}</if>
             <if test="wordList != null and wordList != ''">AND w.word_list = #{wordList}</if>
             <if test="topicTags != null and topicTags != ''">AND w.topic_tags LIKE '%' || #{topicTags} || '%'</if>
+            <if test="keyword != null and keyword != ''">AND w.word ILIKE '%' || #{keyword} || '%'</if>
             <if test="studyStatus != null and studyStatus != ''">
                 <choose>
                     <when test="studyStatus == 'NEW'">AND sr.id IS NULL</when>
@@ -39,7 +40,8 @@
     </select>
 
     <select id="findAll" resultMap="BaseResultMap">
-        SELECT w.*, sr.status AS study_status
+        SELECT w.*, sr.status AS study_status,
+               (SELECT COUNT(*) FROM ielts_content_links cl WHERE cl.target_type = 'WORD' AND cl.target_id = w.id) AS link_count
         FROM ielts_words w
         LEFT JOIN ielts_study_records sr ON sr.content_type = 'WORD' AND sr.content_id = w.id
         <include refid="Where_Clause"/>

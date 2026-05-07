@@ -16,7 +16,8 @@ public interface IeltsPhraseMapper {
     List<IeltsPhrase> findAll(@Param("difficulty") Integer difficulty,
                               @Param("category") String category,
                               @Param("topicTags") String topicTags,
-                            @Param("studyStatus") String studyStatus);
+                              @Param("studyStatus") String studyStatus,
+                              @Param("keyword") String keyword);
 
     long countAll(@Param("difficulty") Integer difficulty,
                   @Param("category") String category,

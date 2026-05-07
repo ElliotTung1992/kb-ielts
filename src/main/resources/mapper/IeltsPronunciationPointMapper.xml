@@ -16,6 +16,7 @@
         <where>
             <if test="difficulty != null">AND pp.difficulty = #{difficulty}</if>
             <if test="category != null and category != ''">AND pp.category = #{category}</if>
+            <if test="keyword != null and keyword != ''">AND pp.title ILIKE '%' || #{keyword} || '%'</if>
             <if test="studyStatus != null and studyStatus != ''">
                 <choose>
                     <when test="studyStatus == 'NEW'">AND sr.id IS NULL</when>
@@ -32,7 +33,8 @@
     </select>
 
     <select id="findAll" resultMap="BaseResultMap">
-        SELECT pp.*, sr.status AS study_status
+        SELECT pp.*, sr.status AS study_status,
+               (SELECT COUNT(*) FROM ielts_content_links cl WHERE cl.target_type = 'PRONUNCIATION' AND cl.target_id = pp.id) AS link_count
         FROM ielts_pronunciation_points pp
         LEFT JOIN ielts_study_records sr ON sr.content_type = 'PRONUNCIATION' AND sr.content_id = pp.id
         <include refid="Where_Clause"/>

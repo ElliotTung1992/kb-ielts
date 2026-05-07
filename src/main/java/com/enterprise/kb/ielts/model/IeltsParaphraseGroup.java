@@ -31,6 +31,8 @@ public class IeltsParaphraseGroup {
     private Instant updatedAt;
     /** 非列字段，由 LEFT JOIN ielts_study_records 填充；null=待学习 / LEARNING=学习中 / REVIEWING=复习中 / MASTERED=已掌握 */
     private String studyStatus;
+    /** 非列字段，被几个技能内容引用；由 findAll 中的相关子查询填充 */
+    private Integer linkCount;
     /** 非列字段，由 ielts_examples 表关联加载（sentence=原句, translation=改写句） */
     private List<IeltsExample> examples = new ArrayList<>();
 }

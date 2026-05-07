@@ -2,6 +2,7 @@ package com.enterprise.kb.ielts.service.impl;
 
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.common.exception.ResourceNotFoundException;
+import com.enterprise.kb.ielts.mapper.IeltsContentLinkMapper;
 import com.enterprise.kb.ielts.mapper.IeltsWritingTaskMapper;
 import com.enterprise.kb.ielts.model.IeltsWritingTask;
 import com.enterprise.kb.ielts.service.IeltsWritingTaskService;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class IeltsWritingTaskServiceImpl implements IeltsWritingTaskService {
 
     private final IeltsWritingTaskMapper taskMapper;
+    private final IeltsContentLinkMapper contentLinkMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -62,6 +64,7 @@ public class IeltsWritingTaskServiceImpl implements IeltsWritingTaskService {
     @Transactional
     public void delete(UUID id) {
         getById(id);
+        contentLinkMapper.deleteBySource("WRITING", id);
         taskMapper.deleteById(id);
     }
 

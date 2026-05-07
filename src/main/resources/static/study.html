@@ -40,6 +40,7 @@
           <div class="fw-bold fs-5 mb-2" id="cardBack"></div>
           <div class="text-muted small mb-2" id="cardExample"></div>
           <div class="text-muted small" id="cardExtra"></div>
+          <div id="cardLinkedItems" class="mt-3"></div>
         </div>
       </div>
     </div>
@@ -243,6 +244,28 @@ function renderCard(type, c, record) {
     document.getElementById('cardExtra').textContent = extra || '';
     document.getElementById('cardType').textContent = TYPE_LABELS[type] || type;
     document.getElementById('cardDiff').innerHTML = diffBadge(c.difficulty);
+    renderLinkedItems(record.linkedItems);
+}
+
+const LINK_TYPE_ZH = {
+    vocabulary: '词汇', paraphrase: '同义替换', grammar: '语法', pronunciation: '发音', signal: '信号词'
+};
+const TARGET_TYPE_ZH = {
+    WORD: '单词', PHRASE: '短语', PARAPHRASE: '同义替换', PRONUNCIATION: '发音要点', GRAMMAR_POINT: '语法要点'
+};
+
+function renderLinkedItems(links) {
+    const el = document.getElementById('cardLinkedItems');
+    if (!links || !links.length) { el.innerHTML = ''; return; }
+    // 按 linkType 分组
+    const groups = {};
+    links.forEach(l => { const g = LINK_TYPE_ZH[l.linkType] || l.linkType || '关联'; if (!groups[g]) groups[g] = []; groups[g].push(l); });
+    el.innerHTML = `<hr class="my-2"><div class="text-secondary fw-semibold" style="font-size:0.8em">相关内容</div>` +
+        Object.entries(groups).map(([label, items]) =>
+            `<div class="mt-1 small"><span class="text-muted">${escHtml(label)}：</span>` +
+            items.map(l => `<span class="badge bg-light text-dark me-1">${escHtml(l.targetSummary||'')}</span>`).join('') +
+            `</div>`
+        ).join('');
 }
 
 function flipCard() {

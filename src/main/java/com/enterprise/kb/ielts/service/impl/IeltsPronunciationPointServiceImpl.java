@@ -2,6 +2,7 @@ package com.enterprise.kb.ielts.service.impl;
 
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.common.exception.ResourceNotFoundException;
+import com.enterprise.kb.ielts.mapper.IeltsContentLinkMapper;
 import com.enterprise.kb.ielts.mapper.IeltsExampleMapper;
 import com.enterprise.kb.ielts.mapper.IeltsPronunciationPointMapper;
 import com.enterprise.kb.ielts.model.IeltsExample;
@@ -25,12 +26,13 @@ public class IeltsPronunciationPointServiceImpl implements IeltsPronunciationPoi
 
     private final IeltsPronunciationPointMapper pointMapper;
     private final IeltsExampleMapper exampleMapper;
+    private final IeltsContentLinkMapper contentLinkMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<IeltsPronunciationPoint> listPoints(Integer difficulty, String category, String studyStatus, int page, int size) {
+    public PageResponse<IeltsPronunciationPoint> listPoints(Integer difficulty, String category, String studyStatus, String keyword, int page, int size) {
         PageHelper.startPage(page, size);
-        List<IeltsPronunciationPoint> list = pointMapper.findAll(difficulty, category, studyStatus);
+        List<IeltsPronunciationPoint> list = pointMapper.findAll(difficulty, category, studyStatus, keyword);
         return PageResponse.of(new PageInfo<>(list));
     }
 
@@ -72,6 +74,7 @@ public class IeltsPronunciationPointServiceImpl implements IeltsPronunciationPoi
     @Transactional
     public void delete(UUID id) {
         pointMapper.findById(id).orElseThrow(() -> new ResourceNotFoundException("IeltsPronunciationPoint", id));
+        contentLinkMapper.deleteByTarget(CONTENT_TYPE, id);
         exampleMapper.deleteByContent(CONTENT_TYPE, id);
         pointMapper.deleteById(id);
     }

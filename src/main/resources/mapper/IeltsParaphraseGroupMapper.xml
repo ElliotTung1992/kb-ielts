@@ -15,6 +15,7 @@
         <where>
             <if test="difficulty != null">AND pg.difficulty = #{difficulty}</if>
             <if test="topicTags != null and topicTags != ''">AND pg.topic_tags LIKE '%' || #{topicTags} || '%'</if>
+            <if test="keyword != null and keyword != ''">AND pg.core_expression ILIKE '%' || #{keyword} || '%'</if>
             <if test="studyStatus != null and studyStatus != ''">
                 <choose>
                     <when test="studyStatus == 'NEW'">AND sr.id IS NULL</when>
@@ -31,7 +32,8 @@
     </select>
 
     <select id="findAll" resultMap="BaseResultMap">
-        SELECT pg.*, sr.status AS study_status
+        SELECT pg.*, sr.status AS study_status,
+               (SELECT COUNT(*) FROM ielts_content_links cl WHERE cl.target_type = 'PARAPHRASE' AND cl.target_id = pg.id) AS link_count
         FROM ielts_paraphrase_groups pg
         LEFT JOIN ielts_study_records sr ON sr.content_type = 'PARAPHRASE' AND sr.content_id = pg.id
         <include refid="Where_Clause"/>

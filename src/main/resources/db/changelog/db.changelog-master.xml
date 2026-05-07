@@ -11,5 +11,7 @@
              relativeToChangelogFile="false"/>
     <include file="classpath:db/changelog/003-add-word-related-words.sql"
              relativeToChangelogFile="false"/>
+    <include file="classpath:db/changelog/004-create-content-links.sql"
+             relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

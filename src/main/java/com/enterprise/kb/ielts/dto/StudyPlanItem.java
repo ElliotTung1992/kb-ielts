@@ -3,6 +3,8 @@ package com.enterprise.kb.ielts.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -34,6 +36,9 @@ public class StudyPlanItem {
 
     /** 下次复习日期，来自 study_records.next_review_at */
     private java.time.LocalDate nextReviewAt;
+
+    /** 关联内容摘要列表（仅技能内容项有值），由 getTodayPlan() 填充 */
+    private List<ContentLinkDto> linkedItems = Collections.emptyList();
 
     public static StudyPlanItem forReview(UUID recordId, String contentType, UUID contentId, String summary) {
         StudyPlanItem item = new StudyPlanItem();

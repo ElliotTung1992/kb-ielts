@@ -38,6 +38,14 @@ const Api = {
     exercisesByPoint: (grammarPointId) =>
         get(`${API_BASE}/grammar-exercises/by-grammar-point/${grammarPointId}`),
 
+    // 内容关联 API
+    links: {
+        list:      (resource, id)              => get(`${API_BASE}/${resource}/${id}/links`),
+        add:       (resource, id, body)        => post(`${API_BASE}/${resource}/${id}/links`, body),
+        remove:    (resource, id, linkId)      => del(`${API_BASE}/${resource}/${id}/links/${linkId}`),
+        backlinks: (resource, id)              => get(`${API_BASE}/${resource}/${id}/links`),
+    },
+
     // 学习核心 API
     study: {
         todayPlan:    ()        => get(`${API_BASE}/study/today`),

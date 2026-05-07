@@ -2,6 +2,7 @@ package com.enterprise.kb.ielts.service.impl;
 
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.common.exception.ResourceNotFoundException;
+import com.enterprise.kb.ielts.mapper.IeltsContentLinkMapper;
 import com.enterprise.kb.ielts.mapper.IeltsExampleMapper;
 import com.enterprise.kb.ielts.mapper.IeltsParaphraseGroupMapper;
 import com.enterprise.kb.ielts.model.IeltsExample;
@@ -25,12 +26,13 @@ public class IeltsParaphraseGroupServiceImpl implements IeltsParaphraseGroupServ
 
     private final IeltsParaphraseGroupMapper groupMapper;
     private final IeltsExampleMapper exampleMapper;
+    private final IeltsContentLinkMapper contentLinkMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<IeltsParaphraseGroup> listGroups(Integer difficulty, String topicTags, String studyStatus, int page, int size) {
+    public PageResponse<IeltsParaphraseGroup> listGroups(Integer difficulty, String topicTags, String studyStatus, String keyword, int page, int size) {
         PageHelper.startPage(page, size);
-        List<IeltsParaphraseGroup> list = groupMapper.findAll(difficulty, topicTags, studyStatus);
+        List<IeltsParaphraseGroup> list = groupMapper.findAll(difficulty, topicTags, studyStatus, keyword);
         return PageResponse.of(new PageInfo<>(list));
     }
 
@@ -72,6 +74,7 @@ public class IeltsParaphraseGroupServiceImpl implements IeltsParaphraseGroupServ
     @Transactional
     public void delete(UUID id) {
         groupMapper.findById(id).orElseThrow(() -> new ResourceNotFoundException("IeltsParaphraseGroup", id));
+        contentLinkMapper.deleteByTarget(CONTENT_TYPE, id);
         exampleMapper.deleteByContent(CONTENT_TYPE, id);
         groupMapper.deleteById(id);
     }
