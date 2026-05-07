@@ -4,8 +4,12 @@ import com.enterprise.kb.common.dto.ApiResponse;
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.ielts.model.IeltsReadingItem;
 import com.enterprise.kb.ielts.service.IeltsReadingItemService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/ielts/reading-items")
 @RequiredArgsConstructor
+@Validated
 public class IeltsReadingItemController {
 
     private final IeltsReadingItemService itemService;
@@ -35,13 +40,13 @@ public class IeltsReadingItemController {
      */
     @GetMapping
     public ApiResponse<PageResponse<IeltsReadingItem>> list(
-            @RequestParam(required = false) Integer difficulty,
-            @RequestParam(required = false) String trainingType,
+            @RequestParam(required = false) @Min(value = 1, message = "difficulty 必须在 1-3 之间") @Max(value = 3, message = "difficulty 必须在 1-3 之间") Integer difficulty,
+            @RequestParam(required = false) @Pattern(regexp = "ACADEMIC|GENERAL", message = "trainingType 必须为 ACADEMIC/GENERAL") String trainingType,
             @RequestParam(required = false) String questionType,
             @RequestParam(required = false) String topicTags,
-            @RequestParam(required = false) String studyStatus,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(required = false) @Pattern(regexp = "NEW|LEARNING|REVIEWING|MASTERED", message = "studyStatus 必须为 NEW/LEARNING/REVIEWING/MASTERED") String studyStatus,
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "page 必须大于等于 1") int page,
+            @RequestParam(defaultValue = "20") @Min(value = 1, message = "size 必须在 1-100 之间") @Max(value = 100, message = "size 必须在 1-100 之间") int size) {
         return ApiResponse.ok(itemService.listItems(difficulty, trainingType, questionType, topicTags, studyStatus, page, size));
     }
 

@@ -9,7 +9,9 @@ import com.enterprise.kb.ielts.dto.TodayPlanResponse;
 import com.enterprise.kb.ielts.model.IeltsStudyRecord;
 import com.enterprise.kb.ielts.service.IeltsStudyService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/ielts/study")
 @RequiredArgsConstructor
+@Validated
 public class IeltsStudyController {
 
     private final IeltsStudyService studyService;
@@ -73,7 +76,10 @@ public class IeltsStudyController {
      * @return 条目列表
      */
     @GetMapping("/records")
-    public ApiResponse<List<StudyPlanItem>> getRecordsByStatus(@RequestParam String status) {
+    public ApiResponse<List<StudyPlanItem>> getRecordsByStatus(
+            @RequestParam
+            @Pattern(regexp = "LEARNING|REVIEWING|MASTERED", message = "status 必须为 LEARNING/REVIEWING/MASTERED")
+            String status) {
         return ApiResponse.ok(studyService.getRecordsByStatus(status));
     }
 }

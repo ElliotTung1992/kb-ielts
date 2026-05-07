@@ -46,6 +46,8 @@ class IeltsStudyControllerValidationTest {
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.traceId").exists())
                 .andExpect(jsonPath("$.message").value("rating 必须为 AGAIN/HARD/GOOD/EASY"));
     }
 
@@ -63,10 +65,12 @@ class IeltsStudyControllerValidationTest {
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.traceId").exists())
                 .andExpect(jsonPath("$.message").value("contentType 必须为有效的 IELTS 内容类型"));
     }
 
-    private static class NoopIeltsStudyService implements IeltsStudyService {
+    static class NoopIeltsStudyService implements IeltsStudyService {
 
         @Override
         public TodayPlanResponse getTodayPlan() {

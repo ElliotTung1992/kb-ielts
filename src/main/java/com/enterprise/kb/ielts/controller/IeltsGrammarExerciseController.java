@@ -4,8 +4,12 @@ import com.enterprise.kb.common.dto.ApiResponse;
 import com.enterprise.kb.common.dto.PageResponse;
 import com.enterprise.kb.ielts.model.IeltsGrammarExercise;
 import com.enterprise.kb.ielts.service.IeltsGrammarExerciseService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/ielts/grammar-exercises")
 @RequiredArgsConstructor
+@Validated
 public class IeltsGrammarExerciseController {
 
     private final IeltsGrammarExerciseService exerciseService;
@@ -34,12 +39,12 @@ public class IeltsGrammarExerciseController {
      */
     @GetMapping
     public ApiResponse<PageResponse<IeltsGrammarExercise>> list(
-            @RequestParam(required = false) Integer difficulty,
+            @RequestParam(required = false) @Min(value = 1, message = "difficulty 必须在 1-3 之间") @Max(value = 3, message = "difficulty 必须在 1-3 之间") Integer difficulty,
             @RequestParam(required = false) String questionType,
             @RequestParam(required = false) UUID grammarPointId,
-            @RequestParam(required = false) String studyStatus,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(required = false) @Pattern(regexp = "NEW|LEARNING|REVIEWING|MASTERED", message = "studyStatus 必须为 NEW/LEARNING/REVIEWING/MASTERED") String studyStatus,
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "page 必须大于等于 1") int page,
+            @RequestParam(defaultValue = "20") @Min(value = 1, message = "size 必须在 1-100 之间") @Max(value = 100, message = "size 必须在 1-100 之间") int size) {
         return ApiResponse.ok(exerciseService.listExercises(difficulty, questionType, grammarPointId, studyStatus, page, size));
     }
 

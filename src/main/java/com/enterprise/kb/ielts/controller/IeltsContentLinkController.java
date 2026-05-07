@@ -5,6 +5,7 @@ import com.enterprise.kb.ielts.dto.AddLinkRequest;
 import com.enterprise.kb.ielts.dto.ContentLinkDto;
 import com.enterprise.kb.ielts.model.IeltsContentLink;
 import com.enterprise.kb.ielts.service.IeltsContentLinkService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class IeltsContentLinkController {
     @PostMapping("/api/ielts/listening-items/{id}/links")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<IeltsContentLink> addListeningLink(@PathVariable UUID id,
-                                                           @RequestBody AddLinkRequest req) {
+                                                           @Valid @RequestBody AddLinkRequest req) {
         return ApiResponse.ok(linkService.addLink("LISTENING", id, req), "关联添加成功");
     }
 
@@ -53,7 +54,7 @@ public class IeltsContentLinkController {
     @PostMapping("/api/ielts/reading-items/{id}/links")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<IeltsContentLink> addReadingLink(@PathVariable UUID id,
-                                                         @RequestBody AddLinkRequest req) {
+                                                         @Valid @RequestBody AddLinkRequest req) {
         return ApiResponse.ok(linkService.addLink("READING", id, req), "关联添加成功");
     }
 
@@ -72,7 +73,7 @@ public class IeltsContentLinkController {
     @PostMapping("/api/ielts/writing-tasks/{id}/links")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<IeltsContentLink> addWritingLink(@PathVariable UUID id,
-                                                         @RequestBody AddLinkRequest req) {
+                                                         @Valid @RequestBody AddLinkRequest req) {
         return ApiResponse.ok(linkService.addLink("WRITING", id, req), "关联添加成功");
     }
 
@@ -91,7 +92,7 @@ public class IeltsContentLinkController {
     @PostMapping("/api/ielts/speaking-topics/{id}/links")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<IeltsContentLink> addSpeakingLink(@PathVariable UUID id,
-                                                          @RequestBody AddLinkRequest req) {
+                                                          @Valid @RequestBody AddLinkRequest req) {
         return ApiResponse.ok(linkService.addLink("SPEAKING", id, req), "关联添加成功");
     }
 
