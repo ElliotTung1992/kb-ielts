@@ -150,6 +150,7 @@ async function startStudy(type, id) { try { await Api.study.start(type,id); show
 function openBacklinks(id, label) { BacklinksPanel.open(TYPE, id, label); }
 async function doImport() { try { const arr=JSON.parse(document.getElementById('importJson').value.trim()); const res=await Api.batchImport(TYPE,arr); importModal.hide(); showToast(`成功导入 ${res.imported} 条`); loadPage(1); } catch(e) { showToast('导入失败: '+e.message,'danger'); } }
 
+attachTopicTagDatalist(['fTopics', 'fTopic']);
 loadPage(1).catch(e => showToast('加载失败','danger'));
 </script>
 </body>

@@ -288,6 +288,7 @@ async function doImport() {
     } catch(e) { showToast('JSON 格式错误或导入失败: ' + e.message, 'danger'); }
 }
 
+attachTopicTagDatalist(['fTopics', 'fTopic']);
 loadPage(1).catch(e => showToast('加载失败', 'danger'));
 </script>
 </body>

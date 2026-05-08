@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>话题标签 - IELTS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/ielts.css">
+</head>
+<body>
+<div id="sidebarMount"></div>
+<div id="main">
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-3">
+      <button id="sidebarToggler" class="btn btn-sm btn-outline-secondary d-md-none"><i class="bi bi-list"></i></button>
+      <h4 class="mb-0 fw-bold"><i class="bi bi-tags me-2"></i>话题标签</h4>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="openAdd()"><i class="bi bi-plus-lg me-1"></i>添加标签</button>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3"><label class="form-label small text-muted mb-1">关键词</label><input class="form-control form-control-sm" id="filterKeyword" placeholder="education"></div>
+        <div class="col-md-2"><label class="form-label small text-muted mb-1">分类</label><input class="form-control form-control-sm" id="filterCategory" placeholder="topic"></div>
+        <div class="col-md-2"><label class="form-label small text-muted mb-1">技能</label><input class="form-control form-control-sm" id="filterSkill" placeholder="speaking"></div>
+        <div class="col-md-2"><label class="form-label small text-muted mb-1">状态</label><select class="form-select form-select-sm" id="filterEnabled"><option value="">全部</option><option value="true">启用</option><option value="false">停用</option></select></div>
+        <div class="col-md-1"><button class="btn btn-primary btn-sm w-100" onclick="loadTags()"><i class="bi bi-search"></i></button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light"><tr><th>标签</th><th>分类</th><th>适用技能</th><th>使用</th><th>状态</th><th style="width:132px">操作</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="modalTitle">添加标签</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">标签名称 *</label><input class="form-control" id="tagName" maxlength="80"></div>
+        <div class="col-md-6"><label class="form-label">分类</label><input class="form-control" id="category" placeholder="topic / scenario / exam-theme"></div>
+        <div class="col-md-6"><label class="form-label">适用技能</label><input class="form-control" id="skillTags" placeholder="speaking,writing"></div>
+        <div class="col-md-6"><label class="form-label">使用次数</label><input class="form-control" id="usageCount" type="number" min="0"></div>
+        <div class="col-12"><label class="form-label">说明</label><textarea class="form-control" id="description" rows="3"></textarea></div>
+        <div class="col-12"><div class="form-check form-switch"><input class="form-check-input" id="enabled" type="checkbox" checked><label class="form-check-label" for="enabled">启用</label></div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" id="saveBtn" onclick="save()">保存</button></div>
+  </div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script><script src="js/nav.js"></script>
+<script>
+document.getElementById('sidebarMount').innerHTML = renderSidebar();
+let editId = null;
+let tagCache = new Map();
+const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+
+async function loadTags() {
+    const params = {
+        keyword: document.getElementById('filterKeyword').value,
+        category: document.getElementById('filterCategory').value,
+        skill: document.getElementById('filterSkill').value,
+        enabled: document.getElementById('filterEnabled').value,
+        limit: 200
+    };
+    const rows = await Api.topicTags.list(params);
+    tagCache = new Map(rows.map(row => [row.id, row]));
+    document.getElementById('tbody').innerHTML = rows.length ? rows.map(renderRow).join('') : `<tr><td colspan="6" class="text-center text-muted py-5">暂无话题标签</td></tr>`;
+}
+
+function renderRow(tag) {
+    return `
+    <tr>
+      <td><span class="badge bg-light text-dark border">${escHtml(tag.tagName)}</span>${tag.description ? `<div class="small text-muted mt-1">${escHtml(tag.description)}</div>` : ''}</td>
+      <td>${escHtml(tag.category || '-')}</td>
+      <td>${renderSkills(tag.skillTags)}</td>
+      <td>${tag.usageCount || 0}</td>
+      <td>${tag.enabled ? '<span class="badge bg-success">启用</span>' : '<span class="badge bg-secondary">停用</span>'}</td>
+      <td><div class="d-flex gap-1">
+        <button class="btn btn-sm btn-outline-primary" onclick="editById('${tag.id}')"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="removeTag('${tag.id}')"><i class="bi bi-trash"></i></button>
+      </div></td>
+    </tr>`;
+}
+
+function renderSkills(value) {
+    if (!value) return '-';
+    return value.split(',').map(v => v.trim()).filter(Boolean)
+        .map(v => `<span class="badge bg-light text-dark border me-1">${escHtml(v)}</span>`).join('');
+}
+
+function openAdd() {
+    editId = null;
+    document.getElementById('modalTitle').textContent = '添加标签';
+    setForm({});
+    editModal.show();
+}
+
+function editById(id) {
+    const tag = tagCache.get(id);
+    if (!tag) return;
+    editId = id;
+    document.getElementById('modalTitle').textContent = '编辑标签';
+    setForm(tag);
+    editModal.show();
+}
+
+function setForm(tag) {
+    document.getElementById('tagName').value = tag.tagName || '';
+    document.getElementById('category').value = tag.category || '';
+    document.getElementById('skillTags').value = tag.skillTags || '';
+    document.getElementById('usageCount').value = tag.usageCount ?? 0;
+    document.getElementById('description').value = tag.description || '';
+    document.getElementById('enabled').checked = tag.enabled !== false;
+}
+
+function readForm() {
+    return {
+        tagName: document.getElementById('tagName').value.trim(),
+        category: document.getElementById('category').value.trim() || null,
+        skillTags: document.getElementById('skillTags').value.trim() || null,
+        usageCount: parseInt(document.getElementById('usageCount').value || '0', 10),
+        description: document.getElementById('description').value.trim() || null,
+        enabled: document.getElementById('enabled').checked
+    };
+}
+
+async function save() {
+    const body = readForm();
+    if (!body.tagName) {
+        showToast('请填写标签名称', 'warning');
+        return;
+    }
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    try {
+        if (editId) await Api.topicTags.update(editId, body);
+        else await Api.topicTags.create(body);
+        editModal.hide();
+        showToast(editId ? '更新成功' : '添加成功');
+        await loadTags();
+    } catch (e) {
+        showToast(e.message, 'danger');
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
+
+async function removeTag(id) {
+    if (!confirm('确认删除这个标签？')) return;
+    try {
+        await Api.topicTags.remove(id);
+        showToast('删除成功');
+        await loadTags();
+    } catch (e) {
+        showToast(e.message, 'danger');
+    }
+}
+
+loadTags().catch(e => showToast(e.message || '加载失败', 'danger'));
+</script>
+</body>
+</html>

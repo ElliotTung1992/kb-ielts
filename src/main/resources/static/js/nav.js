@@ -36,6 +36,7 @@ function renderSidebar() {
     <div class="nav-section">跨技能内容</div>
     <a class="nav-link" href="words.html"><i class="bi bi-alphabet"></i> 单词</a>
     <a class="nav-link" href="phrases.html"><i class="bi bi-quote"></i> 短语</a>
+    <a class="nav-link" href="topic-tags.html"><i class="bi bi-tags"></i> 话题标签</a>
     <a class="nav-link" href="paraphrases.html"><i class="bi bi-arrow-left-right"></i> 同义替换</a>
     <a class="nav-link" href="pronunciation.html"><i class="bi bi-mic"></i> 发音要点</a>
     <a class="nav-link" href="grammar-points.html"><i class="bi bi-book"></i> 语法要点</a>

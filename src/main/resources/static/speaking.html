@@ -18,17 +18,38 @@
     </div>
     <div class="d-flex gap-2">
       <button class="btn btn-outline-secondary btn-sm" onclick="openImport()"><i class="bi bi-upload me-1"></i>批量导入</button>
-      <button class="btn btn-primary btn-sm" onclick="openAdd()"><i class="bi bi-plus me-1"></i>添加话题</button>
+      <button class="btn btn-primary btn-sm" onclick="openAdd()"><i class="bi bi-plus-lg me-1"></i>添加话题</button>
     </div>
   </div>
 
   <div class="card border-0 shadow-sm mb-3">
-    <div class="card-body py-2">
+    <div class="card-body py-3">
       <div class="row g-2 align-items-end">
-        <div class="col-md-2"><select class="form-select form-select-sm" id="fDiff"><option value="">全部难度</option><option value="1">基础</option><option value="2">中级</option><option value="3">高级</option></select></div>
-        <div class="col-md-2"><select class="form-select form-select-sm" id="fPart"><option value="">全部 Part</option><option value="1">Part 1</option><option value="2">Part 2</option><option value="3">Part 3</option></select></div>
-        <div class="col-md-3"><input class="form-control form-control-sm" id="fTopic" placeholder="话题标签"></div>
-        <div class="col-md-1"><button class="btn btn-primary btn-sm w-100" onclick="loadPage(1)"><i class="bi bi-search"></i></button></div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">难度</label>
+          <select class="form-select form-select-sm" id="filterDiff">
+            <option value="">全部难度</option><option value="1">基础</option><option value="2">中级</option><option value="3">高级</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Part</label>
+          <select class="form-select form-select-sm" id="filterPart">
+            <option value="">全部 Part</option><option value="1">Part 1</option><option value="2">Part 2</option><option value="3">Part 3</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">状态</label>
+          <select class="form-select form-select-sm" id="filterStatus">
+            <option value="">全部状态</option><option value="NEW">待学习</option><option value="LEARNING">学习中</option><option value="REVIEWING">复习中</option><option value="MASTERED">已掌握</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small text-muted mb-1">话题标签</label>
+          <input class="form-control form-control-sm" id="filterTopic" placeholder="work,travel,technology">
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-primary btn-sm w-100" onclick="loadPage(1)"><i class="bi bi-search me-1"></i>筛选</button>
+        </div>
       </div>
     </div>
   </div>
@@ -36,7 +57,9 @@
   <div class="card border-0 shadow-sm">
     <div class="table-responsive">
       <table class="table table-hover mb-0 align-middle">
-        <thead class="table-light"><tr><th>话题标题</th><th>Part</th><th>问题（摘要）</th><th>难度</th><th>操作</th></tr></thead>
+        <thead class="table-light">
+          <tr><th style="width:26%">话题</th><th style="width:10%">Part</th><th>问题</th><th style="width:12%">状态</th><th style="width:10%">难度</th><th style="width:142px">操作</th></tr>
+        </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -48,28 +71,56 @@
 </div>
 
 <div class="modal fade" id="editModal" tabindex="-1">
-  <div class="modal-dialog modal-lg"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title" id="modalTitle">添加口语话题</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="modalTitle">添加口语话题</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
     <div class="modal-body">
       <div class="row g-3">
-        <div class="col-md-8"><label class="form-label">话题标题 *</label><input class="form-control" id="fTitle" required></div>
-        <div class="col-md-2"><label class="form-label">Part *</label><select class="form-select" id="fPart"><option value="1">Part 1</option><option value="2">Part 2</option><option value="3">Part 3</option></select></div>
-        <div class="col-md-2"><label class="form-label">难度</label><select class="form-select" id="fDiffEdit"><option value="1">基础</option><option value="2">中级</option><option value="3">高级</option></select></div>
-        <div class="col-md-12"><label class="form-label">问题（Part 2 为完整 Cue Card）*</label><textarea class="form-control" id="fQuestion" rows="4" required></textarea></div>
-        <div class="col-md-6"><label class="form-label">参考答案思路</label><textarea class="form-control" id="fAnswer" rows="4"></textarea></div>
-        <div class="col-md-6"><label class="form-label">话题标签</label><input class="form-control" id="fTopics"></div>
+        <div class="col-md-7">
+          <label class="form-label">话题标题 *</label>
+          <input class="form-control" id="topicTitle" maxlength="200" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Part *</label>
+          <select class="form-select" id="topicPart">
+            <option value="1">Part 1</option><option value="2">Part 2</option><option value="3">Part 3</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">难度</label>
+          <select class="form-select" id="topicDifficulty">
+            <option value="1">基础</option><option value="2">中级</option><option value="3">高级</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">问题 *</label>
+          <textarea class="form-control" id="topicQuestion" rows="6" required></textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label">参考答案思路</label>
+          <textarea class="form-control" id="topicAnswer" rows="5"></textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label">话题标签</label>
+          <input class="form-control" id="topicTags" placeholder="work,travel,technology">
+        </div>
       </div>
-      <div id="modalLinksContainer"></div>
+      <div id="modalLinksContainer" class="mt-4"></div>
     </div>
-    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" onclick="save()">保存</button></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="save()"><i class="bi bi-check2 me-1"></i>保存</button>
+    </div>
   </div></div>
 </div>
 
 <div class="modal fade" id="importModal" tabindex="-1">
   <div class="modal-dialog modal-lg"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title">批量导入 (JSON)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-header"><h5 class="modal-title">批量导入 JSON</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body"><textarea class="form-control font-monospace" id="importJson" rows="12" placeholder='[{"title":"Technology","part":1,"question":"Do you use technology often?","difficulty":1}]'></textarea></div>
-    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" onclick="doImport()">导入</button></div>
+    <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" onclick="doImport()">导入</button></div>
   </div></div>
 </div>
 
@@ -78,33 +129,186 @@
 <script src="js/links.js"></script>
 <script>
 document.getElementById('sidebarMount').innerHTML = renderSidebar();
-const TYPE='speaking-topics'; let currentPage=1,editId=null;
-const editModal=new bootstrap.Modal(document.getElementById('editModal'));
-const importModal=new bootstrap.Modal(document.getElementById('importModal'));
+const TYPE = 'speaking-topics';
+let currentPage = 1;
+let editId = null;
+let topicCache = new Map();
+const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+const importModal = new bootstrap.Modal(document.getElementById('importModal'));
 
-async function loadPage(page=1) {
-    currentPage=page;
-    const data=await Api.list(TYPE,{difficulty:document.getElementById('fDiff').value,part:document.getElementById('fPart').value,topicTags:document.getElementById('fTopic').value,page,size:20});
-    document.getElementById('totalInfo').textContent=`共 ${data.totalElements} 条`;
-    document.getElementById('tbody').innerHTML=data.content.map(t=>`
-    <tr><td class="fw-semibold">${escHtml(t.title)}</td><td><span class="badge bg-primary">Part ${t.part}</span></td>
-      <td class="small text-muted">${escHtml((t.question||'').substring(0,60))}</td>
-      <td>${diffBadge(t.difficulty)}</td>
-      <td><button class="btn btn-sm btn-outline-primary me-1" onclick='edit(${JSON.stringify(t)})'><i class="bi bi-pencil"></i></button>
-        <button class="btn btn-sm btn-outline-success me-1" onclick="startStudy('SPEAKING','${t.id}')"><i class="bi bi-play"></i></button>
-        <button class="btn btn-sm btn-outline-danger" onclick="remove('${t.id}')"><i class="bi bi-trash"></i></button></td></tr>`).join('');
-    document.getElementById('pagination').innerHTML=Array.from({length:data.totalPages},(_,i)=>`<li class="page-item${i+1===data.page+1?' active':''}"><a class="page-link" href="#" onclick="loadPage(${i+1});return false">${i+1}</a></li>`).join('');
+async function loadPage(page = 1) {
+    currentPage = page;
+    const params = {
+        difficulty: document.getElementById('filterDiff').value,
+        part: document.getElementById('filterPart').value,
+        studyStatus: document.getElementById('filterStatus').value,
+        topicTags: document.getElementById('filterTopic').value,
+        page,
+        size: 20
+    };
+    const data = await Api.list(TYPE, params);
+    topicCache = new Map(data.content.map(topic => [topic.id, topic]));
+    document.getElementById('totalInfo').textContent = `共 ${data.totalElements} 条`;
+    document.getElementById('tbody').innerHTML = data.content.length ? data.content.map(renderRow).join('') : renderEmpty();
+    document.getElementById('pagination').innerHTML = renderPagination(data);
 }
 
-function openAdd(){editId=null;document.getElementById('modalTitle').textContent='添加口语话题';['fTitle','fQuestion','fAnswer','fTopics'].forEach(id=>document.getElementById(id).value='');document.getElementById('fPart').value='1';document.getElementById('fDiffEdit').value='1';LinksPanel.initInline(TYPE,null,'modalLinksContainer');editModal.show();}
-function openImport(){importModal.show();}
-function edit(t){editId=t.id;document.getElementById('modalTitle').textContent='编辑口语话题';document.getElementById('fTitle').value=t.title||'';document.getElementById('fPart').value=t.part||1;document.getElementById('fQuestion').value=t.question||'';document.getElementById('fAnswer').value=t.referenceAnswer||'';document.getElementById('fDiffEdit').value=t.difficulty||1;document.getElementById('fTopics').value=t.topicTags||'';LinksPanel.initInline(TYPE,editId,'modalLinksContainer');editModal.show();}
-async function save(){const body={title:document.getElementById('fTitle').value.trim(),part:parseInt(document.getElementById('fPart').value),question:document.getElementById('fQuestion').value.trim(),referenceAnswer:document.getElementById('fAnswer').value.trim()||null,difficulty:parseInt(document.getElementById('fDiffEdit').value),topicTags:document.getElementById('fTopics').value.trim()||null};try{if(editId){await Api.update(TYPE,editId,body);editModal.hide();showToast('更新成功');loadPage(currentPage);}else{const created=await Api.create(TYPE,body);editId=created.id;document.getElementById('modalTitle').textContent='编辑口语话题';showToast('添加成功，可继续添加关联');loadPage(currentPage);LinksPanel.initInline(TYPE,editId,'modalLinksContainer');}}catch(e){showToast(e.message,'danger');}}
-async function remove(id){if(!confirm('确认删除？'))return;try{await Api.remove(TYPE,id);showToast('删除成功');loadPage(currentPage);}catch(e){showToast(e.message,'danger');}}
-async function startStudy(type,id){try{await Api.study.start(type,id);showToast('已加入学习计划');}catch(e){showToast(e.message,'danger');}}
-async function doImport(){try{const arr=JSON.parse(document.getElementById('importJson').value.trim());const res=await Api.batchImport(TYPE,arr);importModal.hide();showToast(`成功导入 ${res.imported} 条`);loadPage(1);}catch(e){showToast('导入失败: '+e.message,'danger');}}
+function renderRow(t) {
+    return `
+    <tr>
+      <td>
+        <div class="fw-semibold">${escHtml(t.title)}</div>
+        <div class="mt-1">${renderTags(t.topicTags)}</div>
+      </td>
+      <td><span class="badge bg-primary">Part ${t.part}</span></td>
+      <td class="small text-muted">${escHtml(compact(t.question, 96))}</td>
+      <td>${studyStatusBadge(t.studyStatus)}</td>
+      <td>${diffBadge(t.difficulty)}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary" title="编辑" onclick="editById('${t.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-outline-success" title="加入学习" onclick="startStudy('SPEAKING','${t.id}')"><i class="bi bi-play"></i></button>
+          <button class="btn btn-sm btn-outline-danger" title="删除" onclick="remove('${t.id}')"><i class="bi bi-trash"></i></button>
+        </div>
+      </td>
+    </tr>`;
+}
 
-loadPage(1).catch(e=>showToast('加载失败','danger'));
+function renderEmpty() {
+    return `<tr><td colspan="6" class="text-center text-muted py-5">暂无口语话题</td></tr>`;
+}
+
+function renderPagination(data) {
+    if (!data.totalPages || data.totalPages <= 1) return '';
+    return Array.from({length: data.totalPages}, (_, i) => {
+        const page = i + 1;
+        const active = page === data.page + 1 ? ' active' : '';
+        return `<li class="page-item${active}"><a class="page-link" href="#" onclick="loadPage(${page});return false">${page}</a></li>`;
+    }).join('');
+}
+
+function openAdd() {
+    editId = null;
+    document.getElementById('modalTitle').textContent = '添加口语话题';
+    setFormValues({ part: 1, difficulty: 1 });
+    LinksPanel.initInline(TYPE, null, 'modalLinksContainer');
+    editModal.show();
+}
+
+function openImport() {
+    importModal.show();
+}
+
+function editById(id) {
+    const topic = topicCache.get(id);
+    if (!topic) return;
+    editId = id;
+    document.getElementById('modalTitle').textContent = '编辑口语话题';
+    setFormValues(topic);
+    LinksPanel.initInline(TYPE, editId, 'modalLinksContainer');
+    editModal.show();
+}
+
+function setFormValues(topic) {
+    document.getElementById('topicTitle').value = topic.title || '';
+    document.getElementById('topicPart').value = topic.part || 1;
+    document.getElementById('topicQuestion').value = topic.question || '';
+    document.getElementById('topicAnswer').value = topic.referenceAnswer || '';
+    document.getElementById('topicDifficulty').value = topic.difficulty || 1;
+    document.getElementById('topicTags').value = topic.topicTags || '';
+}
+
+async function save() {
+    const body = readForm();
+    if (!body.title || !body.question) {
+        showToast('请填写话题标题和问题', 'warning');
+        return;
+    }
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    try {
+        if (editId) {
+            await Api.update(TYPE, editId, body);
+            editModal.hide();
+            showToast('更新成功');
+            await loadPage(currentPage);
+        } else {
+            const created = await Api.create(TYPE, body);
+            editId = created.id;
+            document.getElementById('modalTitle').textContent = '编辑口语话题';
+            showToast('添加成功，可继续添加关联');
+            await loadPage(1);
+            LinksPanel.initInline(TYPE, editId, 'modalLinksContainer');
+        }
+    } catch (e) {
+        showToast(e.message, 'danger');
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
+
+function readForm() {
+    return {
+        title: document.getElementById('topicTitle').value.trim(),
+        part: parseInt(document.getElementById('topicPart').value, 10),
+        question: document.getElementById('topicQuestion').value.trim(),
+        referenceAnswer: document.getElementById('topicAnswer').value.trim() || null,
+        difficulty: parseInt(document.getElementById('topicDifficulty').value, 10),
+        topicTags: document.getElementById('topicTags').value.trim() || null
+    };
+}
+
+async function remove(id) {
+    if (!confirm('确认删除？')) return;
+    try {
+        await Api.remove(TYPE, id);
+        showToast('删除成功');
+        await loadPage(currentPage);
+    } catch (e) {
+        showToast(e.message, 'danger');
+    }
+}
+
+async function startStudy(type, id) {
+    try {
+        await Api.study.start(type, id);
+        showToast('已加入学习计划');
+        await loadPage(currentPage);
+    } catch (e) {
+        showToast(e.message, 'danger');
+    }
+}
+
+async function doImport() {
+    try {
+        const arr = JSON.parse(document.getElementById('importJson').value.trim());
+        const res = await Api.batchImport(TYPE, arr);
+        importModal.hide();
+        showToast(`成功导入 ${res.imported} 条`);
+        await loadPage(1);
+    } catch (e) {
+        showToast('导入失败: ' + e.message, 'danger');
+    }
+}
+
+function renderTags(tags) {
+    if (!tags) return '';
+    return String(tags).split(',').map(t => t.trim()).filter(Boolean)
+        .map(t => `<span class="badge bg-light text-dark border me-1">${escHtml(t)}</span>`).join('');
+}
+
+function compact(value, limit) {
+    const text = value || '';
+    return text.length > limit ? text.substring(0, limit) + '...' : text;
+}
+
+function studyStatusBadge(status) {
+    if (!status) return '<span class="badge bg-light text-dark border">待学习</span>';
+    return statusBadge(status);
+}
+
+attachTopicTagDatalist(['topicTags', 'filterTopic']);
+loadPage(1).catch(e => showToast(e.message || '加载失败', 'danger'));
 </script>
 </body>
 </html>

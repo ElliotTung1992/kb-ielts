@@ -18,16 +18,18 @@
     </div>
     <div class="d-flex gap-2">
       <button class="btn btn-outline-secondary btn-sm" onclick="openImport()"><i class="bi bi-upload me-1"></i>批量导入</button>
-      <button class="btn btn-primary btn-sm" onclick="openAdd()"><i class="bi bi-plus me-1"></i>添加练习</button>
+      <button class="btn btn-primary btn-sm" onclick="openAdd()"><i class="bi bi-plus-lg me-1"></i>添加练习</button>
     </div>
   </div>
 
   <div class="card border-0 shadow-sm mb-3">
-    <div class="card-body py-2">
+    <div class="card-body py-3">
       <div class="row g-2 align-items-end">
-        <div class="col-md-2"><select class="form-select form-select-sm" id="fDiff"><option value="">全部难度</option><option value="1">基础</option><option value="2">中级</option><option value="3">高级</option></select></div>
-        <div class="col-md-2"><select class="form-select form-select-sm" id="fSec"><option value="">全部Section</option><option value="1">Section 1</option><option value="2">Section 2</option><option value="3">Section 3</option><option value="4">Section 4</option></select></div>
-        <div class="col-md-3"><input class="form-control form-control-sm" id="fTopic" placeholder="话题标签"></div>
+        <div class="col-md-2"><label class="form-label small text-muted mb-1">难度</label><select class="form-select form-select-sm" id="filterDiff"><option value="">全部难度</option><option value="1">基础</option><option value="2">中级</option><option value="3">高级</option></select></div>
+        <div class="col-md-2"><label class="form-label small text-muted mb-1">Section</label><select class="form-select form-select-sm" id="filterSection"><option value="">全部 Section</option><option value="1">Section 1</option><option value="2">Section 2</option><option value="3">Section 3</option><option value="4">Section 4</option></select></div>
+        <div class="col-md-2"><label class="form-label small text-muted mb-1">题型</label><select class="form-select form-select-sm" id="filterQuestionType"><option value="">全部题型</option><option value="form-completion">form-completion</option><option value="note-completion">note-completion</option><option value="table-completion">table-completion</option><option value="multiple-choice">multiple-choice</option><option value="matching">matching</option><option value="map-labelling">map-labelling</option><option value="flow-chart">flow-chart</option></select></div>
+        <div class="col-md-2"><label class="form-label small text-muted mb-1">状态</label><select class="form-select form-select-sm" id="filterStatus"><option value="">全部状态</option><option value="NEW">待学习</option><option value="LEARNING">学习中</option><option value="REVIEWING">复习中</option><option value="MASTERED">已掌握</option></select></div>
+        <div class="col-md-3"><label class="form-label small text-muted mb-1">话题标签</label><input class="form-control form-control-sm" id="filterTopic" placeholder="campus,travel,map"></div>
         <div class="col-md-1"><button class="btn btn-primary btn-sm w-100" onclick="loadPage(1)"><i class="bi bi-search"></i></button></div>
       </div>
     </div>
@@ -36,7 +38,7 @@
   <div class="card border-0 shadow-sm">
     <div class="table-responsive">
       <table class="table table-hover mb-0 align-middle">
-        <thead class="table-light"><tr><th>标题</th><th>Section</th><th>题型</th><th>难度</th><th>操作</th></tr></thead>
+        <thead class="table-light"><tr><th style="width:28%">标题</th><th style="width:12%">Section</th><th style="width:18%">题型</th><th style="width:12%">状态</th><th style="width:10%">难度</th><th style="width:142px">操作</th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -48,32 +50,32 @@
 </div>
 
 <div class="modal fade" id="editModal" tabindex="-1">
-  <div class="modal-dialog modal-xl"><div class="modal-content">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
     <div class="modal-header"><h5 class="modal-title" id="modalTitle">添加听力练习</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
       <div class="row g-3">
-        <div class="col-md-6"><label class="form-label">标题 *</label><input class="form-control" id="fTitle" required></div>
-        <div class="col-md-2"><label class="form-label">Section</label><select class="form-select" id="fSect"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
-        <div class="col-md-2"><label class="form-label">题型</label><select class="form-select" id="fQT"><option value="form-completion">form-completion</option><option value="note-completion">note-completion</option><option value="table-completion">table-completion</option><option value="multiple-choice">multiple-choice</option><option value="matching">matching</option><option value="map-labelling">map-labelling</option><option value="flow-chart">flow-chart</option></select></div>
-        <div class="col-md-2"><label class="form-label">难度</label><select class="form-select" id="fDiffEdit"><option value="1">基础</option><option value="2">中级</option><option value="3">高级</option></select></div>
-        <div class="col-md-6"><label class="form-label">场景描述</label><textarea class="form-control" id="fContext" rows="3"></textarea></div>
-        <div class="col-md-6"><label class="form-label">脚本片段</label><textarea class="form-control" id="fScript" rows="3"></textarea></div>
-        <div class="col-md-6"><label class="form-label">题目（换行分隔）</label><textarea class="form-control" id="fQuestions" rows="4"></textarea></div>
-        <div class="col-md-6"><label class="form-label">答案及解析</label><textarea class="form-control" id="fAnswers" rows="4"></textarea></div>
-        <div class="col-md-6"><label class="form-label">作答技巧</label><textarea class="form-control" id="fTips" rows="2"></textarea></div>
-        <div class="col-md-6"><label class="form-label">话题标签</label><input class="form-control" id="fTopics"></div>
+        <div class="col-md-6"><label class="form-label">标题 *</label><input class="form-control" id="itemTitle" maxlength="200" required></div>
+        <div class="col-md-2"><label class="form-label">Section</label><select class="form-select" id="itemSection"><option value="1">Section 1</option><option value="2">Section 2</option><option value="3">Section 3</option><option value="4">Section 4</option></select></div>
+        <div class="col-md-2"><label class="form-label">题型</label><select class="form-select" id="itemQuestionType"><option value="form-completion">form-completion</option><option value="note-completion">note-completion</option><option value="table-completion">table-completion</option><option value="multiple-choice">multiple-choice</option><option value="matching">matching</option><option value="map-labelling">map-labelling</option><option value="flow-chart">flow-chart</option></select></div>
+        <div class="col-md-2"><label class="form-label">难度</label><select class="form-select" id="itemDifficulty"><option value="1">基础</option><option value="2">中级</option><option value="3">高级</option></select></div>
+        <div class="col-md-6"><label class="form-label">场景描述</label><textarea class="form-control" id="itemContext" rows="3"></textarea></div>
+        <div class="col-md-6"><label class="form-label">脚本片段</label><textarea class="form-control" id="itemScript" rows="3"></textarea></div>
+        <div class="col-md-6"><label class="form-label">题目</label><textarea class="form-control" id="itemQuestions" rows="4"></textarea></div>
+        <div class="col-md-6"><label class="form-label">答案及解析</label><textarea class="form-control" id="itemAnswers" rows="4"></textarea></div>
+        <div class="col-md-6"><label class="form-label">作答技巧</label><textarea class="form-control" id="itemTips" rows="2"></textarea></div>
+        <div class="col-md-6"><label class="form-label">话题标签</label><input class="form-control" id="itemTags" placeholder="campus,travel,map"></div>
       </div>
-      <div id="modalLinksContainer"></div>
+      <div id="modalLinksContainer" class="mt-4"></div>
     </div>
-    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" onclick="save()">保存</button></div>
+    <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" id="saveBtn" onclick="save()"><i class="bi bi-check2 me-1"></i>保存</button></div>
   </div></div>
 </div>
 
 <div class="modal fade" id="importModal" tabindex="-1">
   <div class="modal-dialog modal-lg"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title">批量导入 (JSON)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-header"><h5 class="modal-title">批量导入 JSON</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body"><textarea class="form-control font-monospace" id="importJson" rows="12" placeholder='[{"title":"Library Registration","section":1,"questionType":"form-completion","difficulty":1}]'></textarea></div>
-    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" onclick="doImport()">导入</button></div>
+    <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-primary" onclick="doImport()">导入</button></div>
   </div></div>
 </div>
 
@@ -82,33 +84,183 @@
 <script src="js/links.js"></script>
 <script>
 document.getElementById('sidebarMount').innerHTML = renderSidebar();
-const TYPE='listening-items'; let currentPage=1,editId=null;
-const editModal=new bootstrap.Modal(document.getElementById('editModal'));
-const importModal=new bootstrap.Modal(document.getElementById('importModal'));
+const TYPE = 'listening-items';
+let currentPage = 1;
+let editId = null;
+let itemCache = new Map();
+const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+const importModal = new bootstrap.Modal(document.getElementById('importModal'));
 
-async function loadPage(page=1) {
-    currentPage=page;
-    const data=await Api.list(TYPE,{difficulty:document.getElementById('fDiff').value,section:document.getElementById('fSec').value,topicTags:document.getElementById('fTopic').value,page,size:20});
-    document.getElementById('totalInfo').textContent=`共 ${data.totalElements} 条`;
-    document.getElementById('tbody').innerHTML=data.content.map(i=>`
-    <tr><td class="fw-semibold">${escHtml(i.title)}</td><td><span class="badge bg-secondary">Section ${i.section}</span></td>
-      <td><span class="badge bg-light text-dark">${escHtml(i.questionType||'-')}</span></td>
-      <td>${diffBadge(i.difficulty)}</td>
-      <td><button class="btn btn-sm btn-outline-primary me-1" onclick='edit(${JSON.stringify(i)})'><i class="bi bi-pencil"></i></button>
-        <button class="btn btn-sm btn-outline-success me-1" onclick="startStudy('LISTENING','${i.id}')"><i class="bi bi-play"></i></button>
-        <button class="btn btn-sm btn-outline-danger" onclick="remove('${i.id}')"><i class="bi bi-trash"></i></button></td></tr>`).join('');
-    document.getElementById('pagination').innerHTML=Array.from({length:data.totalPages},(_,i2)=>`<li class="page-item${i2+1===data.page+1?' active':''}"><a class="page-link" href="#" onclick="loadPage(${i2+1});return false">${i2+1}</a></li>`).join('');
+async function loadPage(page = 1) {
+    currentPage = page;
+    const data = await Api.list(TYPE, {
+        difficulty: document.getElementById('filterDiff').value,
+        section: document.getElementById('filterSection').value,
+        questionType: document.getElementById('filterQuestionType').value,
+        studyStatus: document.getElementById('filterStatus').value,
+        topicTags: document.getElementById('filterTopic').value,
+        page,
+        size: 20
+    });
+    itemCache = new Map(data.content.map(item => [item.id, item]));
+    document.getElementById('totalInfo').textContent = `共 ${data.totalElements} 条`;
+    document.getElementById('tbody').innerHTML = data.content.length ? data.content.map(renderRow).join('') : renderEmpty();
+    document.getElementById('pagination').innerHTML = renderPagination(data);
 }
 
-function openAdd(){editId=null;document.getElementById('modalTitle').textContent='添加听力练习';['fTitle','fContext','fScript','fQuestions','fAnswers','fTips','fTopics'].forEach(id=>document.getElementById(id).value='');document.getElementById('fSect').value='1';document.getElementById('fQT').value='form-completion';document.getElementById('fDiffEdit').value='1';LinksPanel.initInline(TYPE,null,'modalLinksContainer');editModal.show();}
-function openImport(){importModal.show();}
-function edit(item){editId=item.id;document.getElementById('modalTitle').textContent='编辑听力练习';document.getElementById('fTitle').value=item.title||'';document.getElementById('fSect').value=item.section||1;document.getElementById('fQT').value=item.questionType||'form-completion';document.getElementById('fContext').value=item.contextDescription||'';document.getElementById('fScript').value=item.scriptExcerpt||'';document.getElementById('fQuestions').value=item.questions||'';document.getElementById('fAnswers').value=item.answers||'';document.getElementById('fTips').value=item.tips||'';document.getElementById('fDiffEdit').value=item.difficulty||1;document.getElementById('fTopics').value=item.topicTags||'';LinksPanel.initInline(TYPE,editId,'modalLinksContainer');editModal.show();}
-async function save(){const body={title:document.getElementById('fTitle').value.trim(),section:parseInt(document.getElementById('fSect').value),questionType:document.getElementById('fQT').value,contextDescription:document.getElementById('fContext').value.trim()||null,scriptExcerpt:document.getElementById('fScript').value.trim()||null,questions:document.getElementById('fQuestions').value.trim()||null,answers:document.getElementById('fAnswers').value.trim()||null,tips:document.getElementById('fTips').value.trim()||null,difficulty:parseInt(document.getElementById('fDiffEdit').value),topicTags:document.getElementById('fTopics').value.trim()||null};try{if(editId){await Api.update(TYPE,editId,body);editModal.hide();showToast('更新成功');loadPage(currentPage);}else{const created=await Api.create(TYPE,body);editId=created.id;document.getElementById('modalTitle').textContent='编辑听力练习';showToast('添加成功，可继续添加关联');loadPage(currentPage);LinksPanel.initInline(TYPE,editId,'modalLinksContainer');}}catch(e){showToast(e.message,'danger');}}
-async function remove(id){if(!confirm('确认删除？'))return;try{await Api.remove(TYPE,id);showToast('删除成功');loadPage(currentPage);}catch(e){showToast(e.message,'danger');}}
-async function startStudy(type,id){try{await Api.study.start(type,id);showToast('已加入学习计划');}catch(e){showToast(e.message,'danger');}}
-async function doImport(){try{const arr=JSON.parse(document.getElementById('importJson').value.trim());const res=await Api.batchImport(TYPE,arr);importModal.hide();showToast(`成功导入 ${res.imported} 条`);loadPage(1);}catch(e){showToast('导入失败: '+e.message,'danger');}}
+function renderRow(item) {
+    return `
+    <tr>
+      <td><div class="fw-semibold">${escHtml(item.title)}</div><div class="mt-1">${renderTags(item.topicTags)}</div></td>
+      <td><span class="badge bg-secondary">Section ${item.section}</span></td>
+      <td><span class="badge bg-light text-dark border">${escHtml(item.questionType || '-')}</span></td>
+      <td>${studyStatusBadge(item.studyStatus)}</td>
+      <td>${diffBadge(item.difficulty)}</td>
+      <td><div class="d-flex gap-1">
+        <button class="btn btn-sm btn-outline-primary" title="编辑" onclick="editById('${item.id}')"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-sm btn-outline-success" title="加入学习" onclick="startStudy('LISTENING','${item.id}')"><i class="bi bi-play"></i></button>
+        <button class="btn btn-sm btn-outline-danger" title="删除" onclick="remove('${item.id}')"><i class="bi bi-trash"></i></button>
+      </div></td>
+    </tr>`;
+}
 
-loadPage(1).catch(e=>showToast('加载失败','danger'));
+function renderEmpty() {
+    return `<tr><td colspan="6" class="text-center text-muted py-5">暂无听力练习</td></tr>`;
+}
+
+function renderPagination(data) {
+    if (!data.totalPages || data.totalPages <= 1) return '';
+    return Array.from({length: data.totalPages}, (_, i) => {
+        const page = i + 1;
+        const active = page === data.page + 1 ? ' active' : '';
+        return `<li class="page-item${active}"><a class="page-link" href="#" onclick="loadPage(${page});return false">${page}</a></li>`;
+    }).join('');
+}
+
+function openAdd() {
+    editId = null;
+    document.getElementById('modalTitle').textContent = '添加听力练习';
+    setFormValues({ section: 1, questionType: 'form-completion', difficulty: 1 });
+    LinksPanel.initInline(TYPE, null, 'modalLinksContainer');
+    editModal.show();
+}
+
+function openImport() {
+    importModal.show();
+}
+
+function editById(id) {
+    const item = itemCache.get(id);
+    if (!item) return;
+    editId = id;
+    document.getElementById('modalTitle').textContent = '编辑听力练习';
+    setFormValues(item);
+    LinksPanel.initInline(TYPE, editId, 'modalLinksContainer');
+    editModal.show();
+}
+
+function setFormValues(item) {
+    document.getElementById('itemTitle').value = item.title || '';
+    document.getElementById('itemSection').value = item.section || 1;
+    document.getElementById('itemQuestionType').value = item.questionType || 'form-completion';
+    document.getElementById('itemContext').value = item.contextDescription || '';
+    document.getElementById('itemScript').value = item.scriptExcerpt || '';
+    document.getElementById('itemQuestions').value = item.questions || '';
+    document.getElementById('itemAnswers').value = item.answers || '';
+    document.getElementById('itemTips').value = item.tips || '';
+    document.getElementById('itemDifficulty').value = item.difficulty || 1;
+    document.getElementById('itemTags').value = item.topicTags || '';
+}
+
+async function save() {
+    const body = readForm();
+    if (!body.title) {
+        showToast('请填写标题', 'warning');
+        return;
+    }
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    try {
+        if (editId) {
+            await Api.update(TYPE, editId, body);
+            editModal.hide();
+            showToast('更新成功');
+            await loadPage(currentPage);
+        } else {
+            const created = await Api.create(TYPE, body);
+            editId = created.id;
+            document.getElementById('modalTitle').textContent = '编辑听力练习';
+            showToast('添加成功，可继续添加关联');
+            await loadPage(1);
+            LinksPanel.initInline(TYPE, editId, 'modalLinksContainer');
+        }
+    } catch (e) {
+        showToast(e.message, 'danger');
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
+
+function readForm() {
+    return {
+        title: document.getElementById('itemTitle').value.trim(),
+        section: parseInt(document.getElementById('itemSection').value, 10),
+        questionType: document.getElementById('itemQuestionType').value,
+        contextDescription: document.getElementById('itemContext').value.trim() || null,
+        scriptExcerpt: document.getElementById('itemScript').value.trim() || null,
+        questions: document.getElementById('itemQuestions').value.trim() || null,
+        answers: document.getElementById('itemAnswers').value.trim() || null,
+        tips: document.getElementById('itemTips').value.trim() || null,
+        difficulty: parseInt(document.getElementById('itemDifficulty').value, 10),
+        topicTags: document.getElementById('itemTags').value.trim() || null
+    };
+}
+
+async function remove(id) {
+    if (!confirm('确认删除？')) return;
+    try {
+        await Api.remove(TYPE, id);
+        showToast('删除成功');
+        await loadPage(currentPage);
+    } catch (e) {
+        showToast(e.message, 'danger');
+    }
+}
+
+async function startStudy(type, id) {
+    try {
+        await Api.study.start(type, id);
+        showToast('已加入学习计划');
+        await loadPage(currentPage);
+    } catch (e) {
+        showToast(e.message, 'danger');
+    }
+}
+
+async function doImport() {
+    try {
+        const arr = JSON.parse(document.getElementById('importJson').value.trim());
+        const res = await Api.batchImport(TYPE, arr);
+        importModal.hide();
+        showToast(`成功导入 ${res.imported} 条`);
+        await loadPage(1);
+    } catch (e) {
+        showToast('导入失败: ' + e.message, 'danger');
+    }
+}
+
+function renderTags(tags) {
+    if (!tags) return '';
+    return String(tags).split(',').map(t => t.trim()).filter(Boolean).map(t => `<span class="badge bg-light text-dark border me-1">${escHtml(t)}</span>`).join('');
+}
+
+function studyStatusBadge(status) {
+    if (!status) return '<span class="badge bg-light text-dark border">待学习</span>';
+    return statusBadge(status);
+}
+
+attachTopicTagDatalist(['itemTags', 'filterTopic']);
+loadPage(1).catch(e => showToast(e.message || '加载失败', 'danger'));
 </script>
 </body>
 </html>

@@ -41,6 +41,12 @@ const Api = {
         create: (data) => post(`${API_BASE}/mock-tests`, data),
         trends: () => get(`${API_BASE}/mock-tests/trends`),
     },
+    topicTags: {
+        list: (params = {}) => get(buildListUrl('topic-tags', params)),
+        create: (data) => post(`${API_BASE}/topic-tags`, data),
+        update: (id, data) => put(`${API_BASE}/topic-tags/${id}`, data),
+        remove: (id) => del(`${API_BASE}/topic-tags/${id}`),
+    },
     writingSubmissions: {
         list: () => get(`${API_BASE}/writing-submissions`),
         create: (data) => post(`${API_BASE}/writing-submissions`, data),
@@ -122,4 +128,21 @@ function showToast(msg, type = 'success') {
 function fmtDate(iso) {
     if (!iso) return '-';
     return new Date(iso).toLocaleDateString('zh-CN');
+}
+
+async function attachTopicTagDatalist(inputIds = []) {
+    const ids = inputIds.filter(id => document.getElementById(id));
+    if (!ids.length || !Api.topicTags) return;
+    const listId = 'topicTagOptions';
+    let datalist = document.getElementById(listId);
+    if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = listId;
+        document.body.appendChild(datalist);
+    }
+    try {
+        const tags = await Api.topicTags.list({ enabled: true, limit: 300 });
+        datalist.innerHTML = tags.map(tag => `<option value="${escHtml(tag.tagName)}"></option>`).join('');
+        ids.forEach(id => document.getElementById(id).setAttribute('list', listId));
+    } catch (_) {}
 }

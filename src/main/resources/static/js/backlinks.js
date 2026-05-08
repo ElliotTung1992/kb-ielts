@@ -60,14 +60,21 @@ const BacklinksPanel = (() => {
         <div class="mb-3">
           <div class="fw-semibold text-secondary small mb-1">${SOURCE_TYPE_LABELS[type] || type} <span class="badge bg-secondary">${groups[type].length}</span></div>
           ${groups[type].map(l => `
-          <div class="border rounded p-2 mb-1 bg-light">
-            <div class="fw-semibold small">${escHtml(l.sourceSummary || '')}</div>
-            <div class="mt-1 d-flex gap-1 flex-wrap">
-              <span class="badge bg-info text-dark">${LINK_TYPE_LABELS[l.linkType] || l.linkType || '-'}</span>
-              ${l.note ? `<span class="text-muted" style="font-size:0.8em">${escHtml(l.note)}</span>` : ''}
-            </div>
+          <div class="d-flex align-items-center border rounded px-2 py-1 mb-1 bg-white gap-2">
+            <span class="badge bg-light text-dark border flex-shrink-0">${SOURCE_TYPE_LABELS[l.sourceType] || l.sourceType}</span>
+            <span class="fw-semibold small">${escHtml(l.sourceSummary || '')}</span>
+            ${l.sourceDetail ? `<span class="text-muted small flex-shrink-0">${escHtml(_formatSourceDetail(l))}</span>` : ''}
+            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle flex-shrink-0">${LINK_TYPE_LABELS[l.linkType] || l.linkType || '-'}</span>
+            ${l.note ? `<span class="text-muted small text-truncate" style="max-width:220px">${escHtml(l.note)}</span>` : ''}
           </div>`).join('')}
         </div>`).join('');
+    }
+
+    function _formatSourceDetail(link) {
+        if (link.sourceType === 'LISTENING') return `Section ${link.sourceDetail}`;
+        if (link.sourceType === 'WRITING') return `Task ${link.sourceDetail}`;
+        if (link.sourceType === 'SPEAKING') return `Part ${link.sourceDetail}`;
+        return link.sourceDetail;
     }
 
     return { open };

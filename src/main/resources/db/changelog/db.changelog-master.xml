@@ -9,4 +9,7 @@
     <include file="classpath:db/changelog/001-kb-ielts-schema.sql"
              relativeToChangelogFile="false"/>
 
+    <include file="classpath:db/changelog/009-create-topic-tags.sql"
+             relativeToChangelogFile="false"/>
+
 </databaseChangeLog>
