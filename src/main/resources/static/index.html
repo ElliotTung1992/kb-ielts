@@ -133,10 +133,12 @@ document.getElementById('sidebarMount').innerHTML = renderSidebar();
 
 async function loadDashboard() {
     try {
-        const [plan, stats] = await Promise.all([Api.study.todayPlan(), Api.study.stats()]);
+        const dashboard = await Api.dashboard();
+        const plan = dashboard.todayPlan;
+        const stats = dashboard.stats;
         document.getElementById('todayTotal').textContent = plan.totalItems;
         document.getElementById('todayDone').textContent = plan.completedItems;
-        document.getElementById('todayDue').textContent = plan.dueItems?.length ?? 0;
+        document.getElementById('todayDue').textContent = stats.dueToday ?? 0;
         document.getElementById('statTotal').textContent = stats.totalRecords;
         document.getElementById('statLearning').textContent = stats.learningCount;
         document.getElementById('statReviewing').textContent = stats.reviewingCount;

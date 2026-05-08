@@ -128,6 +128,13 @@
         SELECT COUNT(*) FROM ielts_study_records
     </select>
 
+    <select id="countDue" resultType="long">
+        SELECT COUNT(*)
+        FROM ielts_study_records
+        WHERE next_review_at &lt;= #{today}
+          AND status != 'MASTERED'
+    </select>
+
     <insert id="insert" parameterType="com.enterprise.kb.ielts.model.IeltsStudyRecord">
         INSERT INTO ielts_study_records (id, content_type, content_id, status, ease_factor,
             interval_days, repetition_count, next_review_at, last_reviewed_at, created_at)

@@ -10,6 +10,7 @@ import java.util.UUID;
 @Setter
 public class IeltsExample {
 
+    /** 主键 */
     private UUID id;
     /** 所属内容类型：WORD / PHRASE / PARAPHRASE / PRONUNCIATION / GRAMMAR_POINT */
     private String contentType;
@@ -23,5 +24,6 @@ public class IeltsExample {
     private String note;
     /** 排序序号 */
     private int sortOrder;
+    /** 创建时间 */
     private Instant createdAt;
 }

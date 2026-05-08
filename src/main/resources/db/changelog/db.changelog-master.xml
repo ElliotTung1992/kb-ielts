@@ -5,19 +5,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <include file="classpath:db/changelog/001-create-ielts-tables.sql"
-             relativeToChangelogFile="false"/>
-    <include file="classpath:db/changelog/002-create-ielts-examples.sql"
-             relativeToChangelogFile="false"/>
-    <include file="classpath:db/changelog/003-add-word-related-words.sql"
-             relativeToChangelogFile="false"/>
-    <include file="classpath:db/changelog/004-create-content-links.sql"
-             relativeToChangelogFile="false"/>
-    <include file="classpath:db/changelog/005-drop-redundant-fields.sql"
-             relativeToChangelogFile="false"/>
-    <include file="classpath:db/changelog/006-create-daily-plan-items.sql"
-             relativeToChangelogFile="false"/>
-    <include file="classpath:db/changelog/007-extend-review-logs.sql"
+    <!-- Consolidated KB IELTS schema changelog. -->
+    <include file="classpath:db/changelog/001-kb-ielts-schema.sql"
              relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

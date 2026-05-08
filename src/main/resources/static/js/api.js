@@ -26,6 +26,35 @@ function buildListUrl(type, params = {}) {
 }
 
 const Api = {
+    dashboard: () => get(`${API_BASE}/dashboard`),
+    profile: {
+        get: () => get(`${API_BASE}/profile`),
+        save: (data) => put(`${API_BASE}/profile`, data),
+        suggestion: () => get(`${API_BASE}/profile/plan-suggestion`),
+    },
+    mistakes: {
+        stats: (days = 30) => get(`${API_BASE}/mistakes/stats?days=${days}`),
+        recent: () => get(`${API_BASE}/mistakes/recent`),
+    },
+    mockTests: {
+        list: () => get(`${API_BASE}/mock-tests`),
+        create: (data) => post(`${API_BASE}/mock-tests`, data),
+        trends: () => get(`${API_BASE}/mock-tests/trends`),
+    },
+    writingSubmissions: {
+        list: () => get(`${API_BASE}/writing-submissions`),
+        create: (data) => post(`${API_BASE}/writing-submissions`, data),
+    },
+    speakingMaterials: {
+        list: (category) => get(`${API_BASE}/speaking-materials${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+        create: (data) => post(`${API_BASE}/speaking-materials`, data),
+    },
+    training: {
+        listening: (params) => get(buildListUrl('training/listening', params)),
+        reading: (params) => get(buildListUrl('training/reading', params)),
+        writing: (params) => get(buildListUrl('training/writing', params)),
+        speaking: (params) => get(buildListUrl('training/speaking', params)),
+    },
     // 通用 CRUD（type: words/phrases/paraphrase-groups/... ）
     list:        (type, params)   => get(buildListUrl(type, params)),
     getById:     (type, id)       => get(`${API_BASE}/${type}/${id}`),

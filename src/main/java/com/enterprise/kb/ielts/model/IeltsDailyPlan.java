@@ -11,6 +11,7 @@ import java.util.UUID;
 @Setter
 public class IeltsDailyPlan {
 
+    /** 主键 */
     private UUID id;
     /** 计划日期（每天唯一） */
     private LocalDate planDate;

@@ -11,6 +11,7 @@ import java.util.UUID;
 @Setter
 public class IeltsStudyRecord {
 
+    /** 主键 */
     private UUID id;
     /** 内容类型：WORD / PHRASE / PARAPHRASE / PRONUNCIATION / GRAMMAR_POINT / GRAMMAR_EXERCISE / SPEAKING / LISTENING / READING / WRITING */
     private String contentType;

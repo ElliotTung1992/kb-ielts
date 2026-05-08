@@ -12,6 +12,7 @@ import java.util.UUID;
 @Setter
 public class IeltsPronunciationPoint {
 
+    /** 主键 */
     private UUID id;
     /** 要点标题 */
     private String title;
@@ -27,7 +28,9 @@ public class IeltsPronunciationPoint {
     private Integer difficulty;
     /** 适用技能（listening,speaking） */
     private String skillTags;
+    /** 创建时间 */
     private Instant createdAt;
+    /** 更新时间 */
     private Instant updatedAt;
     /** 非列字段，由 LEFT JOIN ielts_study_records 填充；null=待学习 / LEARNING=学习中 / REVIEWING=复习中 / MASTERED=已掌握 */
     private String studyStatus;

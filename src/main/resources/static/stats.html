@@ -55,6 +55,12 @@
       </div>
     </div>
   </div>
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold text-danger" id="sDue">-</div><div class="text-muted small">到期积压</div></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold" id="sWeekly">-</div><div class="text-muted small">近 7 天复习</div></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold" id="sMonthly">-</div><div class="text-muted small">近 30 天复习</div></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold text-success" id="sMastery">-</div><div class="text-muted small">掌握率</div></div></div>
+  </div>
 
   <!-- 图表区 -->
   <div class="row g-3">
@@ -118,6 +124,10 @@ async function loadStats() {
     document.getElementById('sMastered').textContent = s.masteredCount;
     document.getElementById('sTodayReviews').textContent = s.todayReviews;
     document.getElementById('sStreak').textContent = s.streakDays;
+    document.getElementById('sDue').textContent = s.dueToday ?? 0;
+    document.getElementById('sWeekly').textContent = s.weeklyReviews ?? 0;
+    document.getElementById('sMonthly').textContent = s.monthlyReviews ?? 0;
+    document.getElementById('sMastery').textContent = `${s.masteryRate ?? 0}%`;
 
     // 柱状图
     new Chart(document.getElementById('chartStatus'), {

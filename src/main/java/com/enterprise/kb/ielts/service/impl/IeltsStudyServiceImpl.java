@@ -10,6 +10,7 @@ import com.enterprise.kb.ielts.dto.TodayPlanResponse;
 import com.enterprise.kb.ielts.mapper.*;
 import com.enterprise.kb.ielts.model.IeltsDailyPlan;
 import com.enterprise.kb.ielts.model.IeltsDailyPlanItem;
+import com.enterprise.kb.ielts.model.IeltsMistakeLog;
 import com.enterprise.kb.ielts.model.IeltsReviewLog;
 import com.enterprise.kb.ielts.model.IeltsStudyRecord;
 import com.enterprise.kb.ielts.service.IeltsStudyService;
@@ -40,6 +41,7 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
     private final IeltsDailyPlanItemMapper dailyPlanItemMapper;
     private final IeltsStudyConfig studyConfig;
     private final IeltsContentLinkMapper contentLinkMapper;
+    private final IeltsMistakeLogMapper mistakeLogMapper;
 
     private final IeltsWordMapper wordMapper;
     private final IeltsPhraseMapper phraseMapper;
@@ -203,6 +205,8 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
         after.applyAfter(reviewLog);
         reviewLogMapper.insert(reviewLog);
 
+        saveMistakes(request, record);
+
         // 更新今日计划完成数
         updateTodayCompleted(record);
 
@@ -218,8 +222,23 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
         long reviewing = recordMapper.countByStatus("REVIEWING");
         long mastered = recordMapper.countByStatus("MASTERED");
         long todayReviews = reviewLogMapper.countByDate(today);
+        long weeklyReviews = countReviewsSince(today.minusDays(6), today);
+        long monthlyReviews = countReviewsSince(today.minusDays(29), today);
+        long dueToday = recordMapper.countDue(today);
         int streak = computeStreak();
-        return new StudyStatsResponse(total, learning, reviewing, mastered, todayReviews, streak);
+        double masteryRate = total == 0 ? 0.0 : Math.round((mastered * 10000.0 / total)) / 100.0;
+        return new StudyStatsResponse(total, learning, reviewing, mastered, todayReviews, streak,
+                dueToday, weeklyReviews, monthlyReviews, masteryRate);
+    }
+
+    private long countReviewsSince(LocalDate start, LocalDate end) {
+        long total = 0;
+        LocalDate date = start;
+        while (!date.isAfter(end)) {
+            total += reviewLogMapper.countByDate(date);
+            date = date.plusDays(1);
+        }
+        return total;
     }
 
     private void updateTodayCompleted(IeltsStudyRecord record) {
@@ -303,10 +322,40 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
         dailyPlanMapper.update(plan);
     }
 
+    private void saveMistakes(ReviewRequest request, IeltsStudyRecord record) {
+        if (request.mistakeTypes() == null || request.mistakeTypes().isEmpty()) {
+            return;
+        }
+        if (!"AGAIN".equals(request.rating()) && !"HARD".equals(request.rating())) {
+            return;
+        }
+        Instant now = Instant.now();
+        request.mistakeTypes().stream()
+                .distinct()
+                .forEach(type -> {
+                    IeltsMistakeLog log = new IeltsMistakeLog();
+                    log.setId(UUID.randomUUID());
+                    log.setContentType(record.getContentType());
+                    log.setContentId(record.getContentId());
+                    log.setRecordId(record.getId());
+                    log.setMistakeType(type);
+                    log.setNote(request.note());
+                    log.setCreatedAt(now);
+                    mistakeLogMapper.insert(log);
+                });
+    }
+
+    /**
+     * 复习前后状态快照，用于写入 review log 以便追踪算法变化。
+     */
     private record ReviewSnapshot(
+            /** 学习状态 */
             String status,
+            /** 当前复习间隔天数 */
             Integer intervalDays,
+            /** 累计复习次数 */
             Integer repetitionCount,
+            /** SM-2 难易系数 */
             java.math.BigDecimal easeFactor
     ) {
 

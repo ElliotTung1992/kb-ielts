@@ -11,6 +11,7 @@ import java.util.UUID;
 @Setter
 public class IeltsReviewLog {
 
+    /** 主键 */
     private UUID id;
     /** 关联 ielts_study_records */
     private UUID recordId;

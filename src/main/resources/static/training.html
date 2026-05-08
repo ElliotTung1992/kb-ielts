@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>专项训练 - IELTS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/ielts.css">
+</head>
+<body>
+<div id="sidebarMount"></div>
+<div id="main">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center"><button id="sidebarToggler" class="btn btn-sm btn-outline-secondary d-md-none me-3"><i class="bi bi-list"></i></button><h4 class="mb-0 fw-bold"><i class="bi bi-compass me-2"></i>专项训练</h4></div>
+    <select id="skill" class="form-select form-select-sm" style="width:160px" onchange="loadTraining()"><option value="listening">听力</option><option value="reading">阅读</option><option value="writing">写作</option><option value="speaking">口语</option></select>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <table class="table table-hover mb-0"><thead class="table-light"><tr><th class="ps-3">标题</th><th>难度</th><th>入口</th></tr></thead><tbody id="tbody"></tbody></table>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+document.getElementById('sidebarMount').innerHTML = renderSidebar();
+const targetPage = {listening:'listening.html', reading:'reading.html', writing:'writing.html', speaking:'speaking.html'};
+async function loadTraining(){
+  const skill = document.getElementById('skill').value;
+  const data = await Api.training[skill]({page:1,size:20});
+  document.getElementById('tbody').innerHTML = (data.content || []).map(i => `<tr><td class="ps-3">${escHtml(i.title || i.question || '-')}</td><td>${diffBadge(i.difficulty)}</td><td><a class="btn btn-sm btn-outline-primary" href="${targetPage[skill]}">查看</a></td></tr>`).join('');
+}
+loadTraining().catch(e => showToast(e.message, 'danger'));
+</script>
+</body>
+</html>

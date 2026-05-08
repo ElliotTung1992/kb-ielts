@@ -12,6 +12,7 @@ import java.util.UUID;
 @Setter
 public class IeltsWord {
 
+    /** 主键 */
     private UUID id;
     /** 单词原形 */
     private String word;
@@ -37,7 +38,9 @@ public class IeltsWord {
     private String topicTags;
     /** 关联词，逗号分隔 */
     private String relatedWords;
+    /** 创建时间 */
     private Instant createdAt;
+    /** 更新时间 */
     private Instant updatedAt;
     /** 非列字段，由 LEFT JOIN ielts_study_records 填充；null=待学习 / LEARNING=学习中 / REVIEWING=复习中 / MASTERED=已掌握 */
     private String studyStatus;

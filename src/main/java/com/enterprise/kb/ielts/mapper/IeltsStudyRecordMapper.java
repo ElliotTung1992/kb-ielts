@@ -36,6 +36,8 @@ public interface IeltsStudyRecordMapper {
 
     long countAll();
 
+    long countDue(@Param("today") LocalDate today);
+
     int insert(IeltsStudyRecord record);
 
     int update(IeltsStudyRecord record);

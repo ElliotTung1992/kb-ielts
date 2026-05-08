@@ -29,6 +29,9 @@ function renderSidebar() {
     <a class="nav-link" href="index.html"><i class="bi bi-house-door"></i> 首页</a>
     <a class="nav-link" href="study.html"><i class="bi bi-play-circle"></i> 今日学习</a>
     <a class="nav-link" href="stats.html"><i class="bi bi-bar-chart-line"></i> 学习统计</a>
+    <a class="nav-link" href="profile.html"><i class="bi bi-bullseye"></i> 备考目标</a>
+    <a class="nav-link" href="training.html"><i class="bi bi-compass"></i> 专项训练</a>
+    <a class="nav-link" href="mock-tests.html"><i class="bi bi-clipboard-data"></i> 模考记录</a>
 
     <div class="nav-section">跨技能内容</div>
     <a class="nav-link" href="words.html"><i class="bi bi-alphabet"></i> 单词</a>
@@ -43,6 +46,8 @@ function renderSidebar() {
     <a class="nav-link" href="listening.html"><i class="bi bi-headphones"></i> 听力练习</a>
     <a class="nav-link" href="reading.html"><i class="bi bi-file-text"></i> 阅读练习</a>
     <a class="nav-link" href="writing.html"><i class="bi bi-pencil"></i> 写作任务</a>
+    <a class="nav-link" href="writing-submissions.html"><i class="bi bi-journal-check"></i> 作文记录</a>
+    <a class="nav-link" href="speaking-materials.html"><i class="bi bi-card-text"></i> 口语素材</a>
   </nav>
 </div>`;
 }
