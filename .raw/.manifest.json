@@ -51,6 +51,41 @@
       "ingested_at": "2026-05-11",
       "pages_created": ["wiki/sources/todolist.md"],
       "pages_updated": []
+    },
+    ".planning/2026-05-12-word-exercise-mode/task_plan.md": {
+      "hash": "a4b474c4d1b77188318ccd33572d7fa7",
+      "ingested_at": "2026-05-12",
+      "pages_created": ["wiki/sources/plan-2026-05-12-word-exercise.md"],
+      "pages_updated": [
+        "wiki/模块/词汇系统.md",
+        "wiki/模块/学习计划.md",
+        "wiki/架构设计/前端架构.md",
+        "wiki/index.md",
+        "wiki/hot.md",
+        "wiki/log.md"
+      ]
+    },
+    ".planning/2026-05-12-word-exercise-mode/findings.md": {
+      "hash": "ca8788dde9af9a967069dad7afdcc7e1",
+      "ingested_at": "2026-05-12",
+      "pages_created": [],
+      "pages_updated": []
+    },
+    ".planning/2026-05-12-word-exercise-mode/progress.md": {
+      "hash": "3c9bb4485d3c20a016abe57afd06fb27",
+      "ingested_at": "2026-05-12",
+      "pages_created": [],
+      "pages_updated": []
+    },
+    "docs/plan/prd-word-exercise-mode.md": {
+      "hash": "2081fcec40300604d116c00d1b6ba163",
+      "ingested_at": "2026-05-12",
+      "pages_created": ["wiki/sources/prd-word-exercise-mode.md"],
+      "pages_updated": [
+        "wiki/模块/词汇系统.md",
+        "wiki/模块/学习计划.md",
+        "wiki/架构设计/前端架构.md"
+      ]
     }
   }
 }

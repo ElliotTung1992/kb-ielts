@@ -178,6 +178,8 @@
   },
   "active": "c818180a895c9267",
   "lastOpenFiles": [
+    "wiki/sources/prd-word-exercise-mode.md",
+    "wiki/sources/plan-2026-05-12-word-exercise.md",
     "target/surefire/surefirebooter-20260512113105727_3.jar",
     "target/surefire/surefire_0-20260512113105727_2tmp",
     "target/surefire/surefire-20260512113105727_1tmp",
@@ -188,7 +190,6 @@
     "target/test-classes/com/enterprise/kb/ielts/study/SpacedRepetitionCalculatorTest.class",
     "target/test-classes/com/enterprise/kb/ielts/service/IeltsStudyServiceImplTest.class",
     "target/test-classes/com/enterprise/kb/ielts/controller/IeltsStudyControllerValidationTest.class",
-    "target/test-classes/com/enterprise/kb/ielts/controller/IeltsStudyControllerValidationTest$NoopIeltsStudyService.class",
     "docs/plan/prd-word-exercise-mode.md",
     "wiki/sources/plan-2026-0508.md",
     "wiki/sources/todolist.md",

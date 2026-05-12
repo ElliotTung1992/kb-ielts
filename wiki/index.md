@@ -32,3 +32,5 @@
 - [[sources/plan-2026-0506]] — 内容关联设计 (docs/plan/plan-2026-0506.md)
 - [[sources/plan-2026-0508]] — 优化路线图+实现日志 (docs/plan/plan-2026-0508.md)
 - [[sources/todolist]] — 待办事项 (docs/plan/todolist.md)
+- [[sources/plan-2026-05-12-word-exercise]] — 打字练习模式规划会话 (.planning/2026-05-12-word-exercise-mode/)
+- [[sources/prd-word-exercise-mode]] — 打字练习模式 PRD (docs/plan/prd-word-exercise-mode.md)

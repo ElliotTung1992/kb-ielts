@@ -1,5 +1,12 @@
 # Ingest Log
 
+## 2026-05-12 | batch ingest | .planning/ + docs/plan/prd-word-exercise-mode.md
+
+- Sources: `.planning/2026-05-12-word-exercise-mode/task_plan.md`, `progress.md`, `docs/plan/prd-word-exercise-mode.md`
+- Pages created: [[sources/plan-2026-05-12-word-exercise]], [[sources/prd-word-exercise-mode]]
+- Pages updated: [[模块/词汇系统]], [[模块/学习计划]], [[架构设计/前端架构]], [[index]], [[hot]]
+- Key insight: WORD/PHRASE 复习改为主动打字练习模式（中文→输入英文→逐词提示→答案）；今日计划限定为 VOCAB_TYPES（WORD/PHRASE/PARAPHRASE），排除所有技能类；无例句的单词在 mapper 层过滤不进计划。
+
 ## 2026-05-11 | batch ingest | docs/plan/ (4 sources)
 
 - Sources: `docs/plan/plan-IELTS.md`, `plan-2026-0506.md`, `plan-2026-0508.md`, `todolist.md`
