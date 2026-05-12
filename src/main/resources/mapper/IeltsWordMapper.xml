@@ -105,6 +105,10 @@
             SELECT 1 FROM ielts_study_records sr
             WHERE sr.content_type = 'WORD' AND sr.content_id = w.id
         )
+        AND EXISTS (
+            SELECT 1 FROM ielts_examples e
+            WHERE e.content_type = 'WORD' AND e.content_id = w.id
+        )
         ORDER BY w.difficulty, w.id
         LIMIT #{limit}
     </select>

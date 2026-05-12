@@ -58,6 +58,27 @@
         </foreach>
     </insert>
 
+    <insert id="insertOne" parameterType="com.enterprise.kb.ielts.model.IeltsDailyPlanItem">
+        INSERT INTO ielts_daily_plan_items (
+            id, plan_id, content_type, content_id, record_id, study_mode,
+            status, summary, sort_order, completed_at, created_at
+        )
+        VALUES (
+            #{id,jdbcType=OTHER},
+            #{planId,jdbcType=OTHER},
+            #{contentType},
+            #{contentId,jdbcType=OTHER},
+            #{recordId,jdbcType=OTHER},
+            #{studyMode},
+            #{status},
+            #{summary},
+            #{sortOrder},
+            #{completedAt},
+            #{createdAt}
+        )
+        ON CONFLICT (plan_id, content_type, content_id, study_mode) DO NOTHING
+    </insert>
+
     <update id="updateRecordIdByContent">
         UPDATE ielts_daily_plan_items
         SET record_id = #{recordId,jdbcType=OTHER}

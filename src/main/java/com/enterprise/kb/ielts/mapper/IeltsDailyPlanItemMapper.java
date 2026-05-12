@@ -19,6 +19,8 @@ public interface IeltsDailyPlanItemMapper {
 
     int batchInsert(@Param("items") List<IeltsDailyPlanItem> items);
 
+    int insertOne(IeltsDailyPlanItem item);
+
     int updateRecordIdByContent(@Param("planId") UUID planId,
                                 @Param("contentType") String contentType,
                                 @Param("contentId") UUID contentId,

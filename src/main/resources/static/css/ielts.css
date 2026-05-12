@@ -182,3 +182,27 @@ body {
     .flip-scene { height: 260px; }
     .flip-word { font-size: 1.6rem; }
 }
+
+/* ── 打字练习模式 ── */
+.ex-prompt-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+.ex-zh-sentence { font-size: 1.4rem; font-weight: 700; line-height: 1.5; }
+.ex-zh-def { opacity: 0.85; font-size: 0.95rem; margin-top: 8px; }
+.sentence-dot {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 50%; background: rgba(255,255,255,0.4);
+    margin: 0 3px; transition: background .2s;
+}
+.sentence-dot.done   { background: rgba(255,255,255,0.9); }
+.sentence-dot.active { background: #fff; }
+.hint-word {
+    display: inline-block; background: #e9ecef;
+    border-radius: 4px; padding: 1px 6px;
+    margin: 2px; font-size: 0.9rem; color: #495057;
+}
+.hint-word.revealed { background: #d1ecf1; color: #0c5460; }

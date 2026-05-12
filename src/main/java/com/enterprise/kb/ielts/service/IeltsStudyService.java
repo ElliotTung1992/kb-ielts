@@ -31,6 +31,16 @@ public interface IeltsStudyService {
     IeltsStudyRecord startStudying(String contentType, UUID contentId);
 
     /**
+     * 手动追加一个内容到今日学习计划。
+     *
+     * @param contentType 内容类型
+     * @param contentId   内容 ID
+     * @param summary     今日计划中展示的摘要
+     * @return 追加后的计划条目
+     */
+    StudyPlanItem addToTodayPlan(String contentType, UUID contentId, String summary);
+
+    /**
      * 提交本次复习评分并更新 SM-2 参数
      *
      * @param request 复习请求（recordId + rating）

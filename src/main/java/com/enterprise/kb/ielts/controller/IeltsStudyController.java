@@ -1,6 +1,7 @@
 package com.enterprise.kb.ielts.controller;
 
 import com.enterprise.kb.common.dto.ApiResponse;
+import com.enterprise.kb.ielts.dto.AddTodayPlanItemRequest;
 import com.enterprise.kb.ielts.dto.ReviewRequest;
 import com.enterprise.kb.ielts.dto.StartStudyRequest;
 import com.enterprise.kb.ielts.dto.StudyPlanItem;
@@ -46,6 +47,14 @@ public class IeltsStudyController {
     @PostMapping("/start")
     public ApiResponse<IeltsStudyRecord> startStudying(@Valid @RequestBody StartStudyRequest request) {
         return ApiResponse.ok(studyService.startStudying(request.contentType(), request.contentId()));
+    }
+
+    @PostMapping("/today/items")
+    public ApiResponse<StudyPlanItem> addToTodayPlan(@Valid @RequestBody AddTodayPlanItemRequest request) {
+        return ApiResponse.ok(
+                studyService.addToTodayPlan(request.contentType(), request.contentId(), request.summary()),
+                "已加入今日学习计划"
+        );
     }
 
     /**

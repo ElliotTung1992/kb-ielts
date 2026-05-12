@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,6 +35,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class IeltsStudyServiceImpl implements IeltsStudyService {
+
+    private static final Set<String> VOCAB_TYPES         = Set.of("WORD", "PHRASE", "PARAPHRASE");
+    private static final Set<String> SKILL_CONTENT_TYPES = Set.of("LISTENING", "READING", "WRITING", "SPEAKING");
 
     private final IeltsStudyRecordMapper recordMapper;
     private final IeltsReviewLogMapper reviewLogMapper;
@@ -68,42 +72,25 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
             return new TodayPlanResponse(today, plan.getTotalItems(), plan.getCompletedItems(), persistedItems);
         }
 
-        // 1. 获取所有到期复习项（单条 JOIN 查询，带摘要）
+        // 1. 获取到期词汇复习项（SQL 已限定 WORD / PHRASE / PARAPHRASE）
         List<StudyPlanItem> reviewItems = recordMapper.findDueItemsWithSummary(today);
 
         // 2. 统计各类型到期复习项数量，用于计算新学配额
         Map<String, Long> dueCounts = reviewItems.stream()
                 .collect(Collectors.groupingBy(StudyPlanItem::getContentType, Collectors.counting()));
 
-        // 3. 补充新学内容（各类型按每日配额 - 已到期数量 补足）
+        // 3. 补充新学内容（词汇类按每日配额 - 已到期数量 补足）
         List<StudyPlanItem> newItems = new ArrayList<>();
-        int words       = studyConfig.getDailyWords();
-        int phrases     = studyConfig.getDailyPhrases();
-        int grammar     = studyConfig.getDailyGrammar();
-        int others      = studyConfig.getDailyOthers();
+        int words   = studyConfig.getDailyWords();
+        int phrases = studyConfig.getDailyPhrases();
+        int others  = studyConfig.getDailyOthers();
 
-        newItems.addAll(fetchNewItems("WORD",             words,   dueCounts,
-                wordMapper::findNewContent,          w -> w.getId(), w -> w.getWord()));
-        newItems.addAll(fetchNewItems("PHRASE",           phrases, dueCounts,
-                phraseMapper::findNewContent,        p -> p.getId(), p -> p.getPhrase()));
-        newItems.addAll(fetchNewItems("PARAPHRASE",       others,  dueCounts,
-                paraphraseGroupMapper::findNewContent, pg -> pg.getId(), pg -> pg.getGroupName()));
-        newItems.addAll(fetchNewItems("PRONUNCIATION",    others,  dueCounts,
-                pronunciationPointMapper::findNewContent, pp -> pp.getId(), pp -> pp.getTitle()));
-        newItems.addAll(fetchNewItems("GRAMMAR_POINT",    grammar, dueCounts,
-                grammarPointMapper::findNewContent,  gp -> gp.getId(), gp -> gp.getTitle()));
-        newItems.addAll(fetchNewItems("GRAMMAR_EXERCISE", grammar, dueCounts,
-                grammarExerciseMapper::findNewContent, ge -> ge.getId(),
-                ge -> ge.getQuestion() != null && ge.getQuestion().length() > 80
-                        ? ge.getQuestion().substring(0, 80) : ge.getQuestion()));
-        newItems.addAll(fetchNewItems("SPEAKING",         others,  dueCounts,
-                speakingTopicMapper::findNewContent, st -> st.getId(), st -> st.getTitle()));
-        newItems.addAll(fetchNewItems("LISTENING",        others,  dueCounts,
-                listeningItemMapper::findNewContent, li -> li.getId(), li -> li.getTitle()));
-        newItems.addAll(fetchNewItems("READING",          others,  dueCounts,
-                readingItemMapper::findNewContent,   ri -> ri.getId(), ri -> ri.getTitle()));
-        newItems.addAll(fetchNewItems("WRITING",          others,  dueCounts,
-                writingTaskMapper::findNewContent,   wt -> wt.getId(), wt -> wt.getTitle()));
+        newItems.addAll(fetchNewItems("WORD",       words,   dueCounts,
+                wordMapper::findNewContent,             w  -> w.getId(),  w  -> w.getWord()));
+        newItems.addAll(fetchNewItems("PHRASE",     phrases, dueCounts,
+                phraseMapper::findNewContent,           p  -> p.getId(),  p  -> p.getPhrase()));
+        newItems.addAll(fetchNewItems("PARAPHRASE", others,  dueCounts,
+                paraphraseGroupMapper::findNewContent,  pg -> pg.getId(), pg -> pg.getGroupName()));
 
         // 4. 合并：复习项优先，新学项置后
         List<StudyPlanItem> allItems = new ArrayList<>(reviewItems);
@@ -179,6 +166,27 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
                     log.debug("新建学习记录: contentType={}, contentId={}", contentType, contentId);
                     return record;
                 });
+    }
+
+    @Override
+    @Transactional
+    public StudyPlanItem addToTodayPlan(String contentType, UUID contentId, String summary) {
+        IeltsDailyPlan plan = getOrCreateTodayPlan();
+
+        IeltsDailyPlanItem planItem = new IeltsDailyPlanItem();
+        planItem.setId(UUID.randomUUID());
+        planItem.setPlanId(plan.getId());
+        planItem.setContentType(contentType);
+        planItem.setContentId(contentId);
+        planItem.setStudyMode("NEW");
+        planItem.setStatus("PENDING");
+        planItem.setSummary(normalizeSummary(summary, contentType, contentId));
+        planItem.setSortOrder(dailyPlanItemMapper.countByPlanId(plan.getId()));
+        planItem.setCreatedAt(Instant.now());
+        if (dailyPlanItemMapper.insertOne(planItem) > 0) {
+            syncPlanCounts(plan);
+        }
+        return StudyPlanItem.forNew(contentType, contentId, planItem.getSummary());
     }
 
     @Override
@@ -276,9 +284,8 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
     }
 
     private void enrichLinkedItems(List<StudyPlanItem> items) {
-        java.util.Set<String> skillTypes = java.util.Set.of("LISTENING", "READING", "WRITING", "SPEAKING");
         items.stream()
-                .filter(item -> skillTypes.contains(item.getContentType()))
+                .filter(item -> SKILL_CONTENT_TYPES.contains(item.getContentType()))
                 .forEach(item -> {
                     List<ContentLinkDto> links = contentLinkMapper.findBySource(
                             item.getContentType(), item.getContentId());
@@ -308,6 +315,28 @@ public class IeltsStudyServiceImpl implements IeltsStudyService {
             planItems.add(planItem);
         }
         dailyPlanItemMapper.batchInsert(planItems);
+    }
+
+    private IeltsDailyPlan getOrCreateTodayPlan() {
+        LocalDate today = LocalDate.now();
+        return dailyPlanMapper.findByPlanDate(today)
+                .orElseGet(() -> {
+                    IeltsDailyPlan plan = new IeltsDailyPlan();
+                    plan.setId(UUID.randomUUID());
+                    plan.setPlanDate(today);
+                    plan.setTotalItems(0);
+                    plan.setCompletedItems(0);
+                    plan.setGeneratedAt(Instant.now());
+                    dailyPlanMapper.insert(plan);
+                    return plan;
+                });
+    }
+
+    private String normalizeSummary(String summary, String contentType, UUID contentId) {
+        if (summary != null && !summary.isBlank()) {
+            return summary.trim();
+        }
+        return contentType + ":" + contentId;
     }
 
     private void attachRecordToTodayPlan(String contentType, UUID contentId, UUID recordId) {

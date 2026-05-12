@@ -83,6 +83,11 @@ class IeltsStudyControllerValidationTest {
         }
 
         @Override
+        public StudyPlanItem addToTodayPlan(String contentType, UUID contentId, String summary) {
+            return null;
+        }
+
+        @Override
         public IeltsStudyRecord submitReview(ReviewRequest request) {
             return null;
         }

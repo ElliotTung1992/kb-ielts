@@ -1,0 +1,56 @@
+{
+  "sources": {
+    "docs/design/class-diagram.md": {
+      "hash": "1dc2ab2a65e0d7561805784f48777023",
+      "ingested_at": "2026-05-11",
+      "pages_created": ["wiki/sources/class-diagram.md"],
+      "pages_updated": ["wiki/技术决策/ADR-002-间隔复习算法.md", "wiki/模块/间隔复习.md"]
+    },
+    "docs/design/db-schema.md": {
+      "hash": "0459b2fbf3306f25ae89e6b5a0ca0916",
+      "ingested_at": "2026-05-11",
+      "pages_created": ["wiki/sources/db-schema.md"],
+      "pages_updated": []
+    },
+    "docs/design/sequence-study.md": {
+      "hash": "de05d1cd6c21e08543cd0ab0e52e386a",
+      "ingested_at": "2026-05-11",
+      "pages_created": ["wiki/sources/sequence-study.md"],
+      "pages_updated": ["wiki/技术决策/ADR-002-间隔复习算法.md", "wiki/模块/间隔复习.md"]
+    },
+    "docs/operation-ielts.md": {
+      "hash": "81103479760156acc2db41226a24d51b",
+      "ingested_at": "2026-05-11",
+      "pages_created": ["wiki/sources/operation-ielts.md"],
+      "pages_updated": []
+    },
+    "docs/plan/plan-IELTS.md": {
+      "hash": "4e3ba4c0eec5073cc92cfab1e235add6",
+      "ingested_at": "2026-05-11",
+      "pages_created": ["wiki/sources/plan-IELTS.md"],
+      "pages_updated": ["wiki/架构设计/数据模型.md"]
+    },
+    "docs/plan/plan-2026-0506.md": {
+      "hash": "fce8a5dcd158755e688a69e0f175f094",
+      "ingested_at": "2026-05-11",
+      "pages_created": ["wiki/sources/plan-2026-0506.md"],
+      "pages_updated": []
+    },
+    "docs/plan/plan-2026-0508.md": {
+      "hash": "a0a34b2bd8b35c411f94895ffbc28258",
+      "ingested_at": "2026-05-11",
+      "pages_created": ["wiki/sources/plan-2026-0508.md"],
+      "pages_updated": [
+        "wiki/技术决策/ADR-002-间隔复习算法.md",
+        "wiki/模块/学习计划.md",
+        "wiki/模块/间隔复习.md"
+      ]
+    },
+    "docs/plan/todolist.md": {
+      "hash": "e1f29de90fb27cb0c85bc7f6f3f30ff5",
+      "ingested_at": "2026-05-11",
+      "pages_created": ["wiki/sources/todolist.md"],
+      "pages_updated": []
+    }
+  }
+}

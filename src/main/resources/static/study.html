@@ -28,7 +28,50 @@
 
   <!-- 卡片区 -->
   <div id="studyArea">
-    <!-- 翻卡 -->
+
+    <!-- 单词/短语打字练习区（WORD / PHRASE 类型） -->
+    <div id="wordExerciseArea" style="display:none">
+      <div class="ex-prompt-card mb-3">
+        <div class="ex-zh-sentence" id="exerciseZh"></div>
+        <div class="ex-zh-def" id="exerciseDef"></div>
+        <div class="mt-3 d-flex gap-2 align-items-center">
+          <span style="font-size:.8rem;opacity:.7">例句</span>
+          <span id="exerciseDots"></span>
+        </div>
+      </div>
+
+      <textarea id="exerciseInput" class="form-control mb-2" rows="3"
+                placeholder="在此输入英文例句..."></textarea>
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <button class="btn btn-sm btn-outline-secondary me-2" onclick="exHint()">
+            <i class="bi bi-lightbulb me-1"></i>提示
+          </button>
+          <span id="exerciseHints" class="small"></span>
+        </div>
+        <button class="btn btn-outline-primary px-4" onclick="revealAnswer()">
+          <i class="bi bi-eye me-1"></i>查看答案
+        </button>
+      </div>
+
+      <div id="exerciseAnswer" style="display:none" class="card border-success mb-3">
+        <div class="card-body">
+          <div class="text-success small fw-semibold mb-2">参考答案</div>
+          <div class="fw-semibold fs-5 mb-1" id="answerSentence"></div>
+          <div class="text-primary fw-bold mb-1" id="answerWord"></div>
+          <div class="text-muted small" id="answerPhonetic"></div>
+        </div>
+      </div>
+
+      <div id="exNextBtn" class="text-end mb-3" style="display:none">
+        <button class="btn btn-primary px-4" onclick="exNext()">
+          下一句 <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 翻卡（非 WORD 类型） -->
     <div class="flip-scene" id="flipScene" onclick="flipCard()">
       <div class="flip-card" id="flipCard">
         <div class="flip-front">
@@ -51,7 +94,7 @@
       <span class="badge bg-light text-dark" id="cardDiff"></span>
     </div>
 
-    <!-- 评分按钮（翻牌后显示） -->
+    <!-- 评分按钮（翻牌/查看答案后显示） -->
     <div class="d-flex justify-content-center rating-btns mt-2" id="ratingArea" style="display:none!important">
       <button class="btn btn-again rounded-pill px-4" onclick="rate('AGAIN')">
         <i class="bi bi-arrow-counterclockwise me-1"></i>Again
@@ -108,6 +151,15 @@ let cursor = 0;
 let currentRecord = null;
 let flipped = false;
 
+let exExamples = [];
+let exCursor = 0;
+let exHintIdx = 0;
+let exWords = [];
+let exWord = '';
+let exPhonetic = '';
+let exDef = '';
+const EXERCISE_TYPES = new Set(['WORD', 'PHRASE']);
+
 const TYPE_LABELS = {
     WORD:'单词', PHRASE:'短语', PARAPHRASE:'同义替换', PRONUNCIATION:'发音',
     GRAMMAR_POINT:'语法', GRAMMAR_EXERCISE:'练习', SPEAKING:'口语',
@@ -144,6 +196,10 @@ async function showItem() {
     document.getElementById('flipCard').classList.remove('flipped');
     document.getElementById('ratingArea').style.setProperty('display', 'none', 'important');
 
+    const isExercise = EXERCISE_TYPES.has(currentRecord.contentType);
+    document.getElementById('wordExerciseArea').style.display = isExercise ? '' : 'none';
+    document.getElementById('flipScene').style.display = isExercise ? 'none' : '';
+
     // 新学项先创建学习记录，拿到 recordId
     if (currentRecord.studyMode === 'NEW' && !currentRecord.recordId) {
         try {
@@ -174,25 +230,17 @@ async function showItem() {
 }
 
 function renderCard(type, c, record) {
+    document.getElementById('cardType').textContent = TYPE_LABELS[type] || type;
+    document.getElementById('cardDiff').innerHTML = diffBadge(c.difficulty);
+    renderLinkedItems(record.linkedItems);
+
+    if (EXERCISE_TYPES.has(type)) {
+        initExercise(type, c);
+        return;
+    }
+
     let front = '', phonetic = '', back = '', example = '', extra = '';
     switch(type) {
-        case 'WORD': {
-            front = c.word;
-            phonetic = [c.phoneticUk && `UK: ${c.phoneticUk}`, c.phoneticUs && `US: ${c.phoneticUs}`].filter(Boolean).join('  ');
-            back = c.definitionZh || c.definitionEn;
-            const ex0 = c.examples && c.examples[0];
-            example = ex0 ? ex0.sentence : '';
-            extra = ex0 ? ex0.translation : '';
-            break;
-        }
-        case 'PHRASE': {
-            front = c.phrase;
-            back = c.meaningZh;
-            const ph0 = c.examples && c.examples[0];
-            example = ph0 ? ph0.sentence : '';
-            extra = ph0 ? ph0.translation : '';
-            break;
-        }
         case 'PARAPHRASE': {
             front = c.coreExpression;
             back = c.synonyms;
@@ -241,9 +289,6 @@ function renderCard(type, c, record) {
     document.getElementById('cardBack').textContent = back || '-';
     document.getElementById('cardExample').textContent = example || '';
     document.getElementById('cardExtra').textContent = extra || '';
-    document.getElementById('cardType').textContent = TYPE_LABELS[type] || type;
-    document.getElementById('cardDiff').innerHTML = diffBadge(c.difficulty);
-    renderLinkedItems(record.linkedItems);
 }
 
 const TARGET_TYPE_ZH = {
@@ -264,8 +309,83 @@ function renderLinkedItems(links) {
         ).join('');
 }
 
+function initExercise(type, c) {
+    if (type === 'WORD') {
+        exWord = c.word;
+        exPhonetic = [c.phoneticUk && `UK: ${c.phoneticUk}`, c.phoneticUs && `US: ${c.phoneticUs}`].filter(Boolean).join('  ');
+        exDef = c.definitionZh || c.definitionEn || '';
+    } else {
+        exWord = c.phrase;
+        exPhonetic = '';
+        exDef = c.meaningZh || '';
+    }
+    exExamples = c.examples || [];
+    exCursor = 0;
+    renderExercise();
+}
+
+function renderExercise() {
+    if (exExamples.length === 0) {
+        document.getElementById('exerciseZh').textContent = '';
+        document.getElementById('exerciseDef').textContent = exDef;
+        document.getElementById('exerciseDots').innerHTML = '';
+        document.getElementById('exerciseInput').value = '';
+        document.getElementById('exerciseHints').innerHTML = '';
+        document.getElementById('exerciseAnswer').style.display = 'none';
+        document.getElementById('exNextBtn').style.display = 'none';
+        document.getElementById('ratingArea').style.setProperty('display', 'flex', 'important');
+        return;
+    }
+    const ex = exExamples[exCursor];
+    document.getElementById('exerciseZh').textContent = ex.translation;
+    document.getElementById('exerciseDef').textContent = exDef;
+    exWords = ex.sentence.split(' ');
+    document.getElementById('exerciseInput').value = '';
+    document.getElementById('exerciseHints').innerHTML = '';
+    document.getElementById('exerciseAnswer').style.display = 'none';
+    document.getElementById('exNextBtn').style.display = 'none';
+    document.getElementById('ratingArea').style.setProperty('display', 'none', 'important');
+    exHintIdx = 0;
+    buildExDots(exCursor, exExamples.length);
+}
+
+function buildExDots(cursor, total) {
+    document.getElementById('exerciseDots').innerHTML = Array.from({length: total}, (_, i) => {
+        const cls = i < cursor ? 'sentence-dot done' : i === cursor ? 'sentence-dot active' : 'sentence-dot';
+        return `<span class="${cls}"></span>`;
+    }).join('');
+}
+
+function exHint() {
+    if (exHintIdx < exWords.length) exHintIdx++;
+    document.getElementById('exerciseHints').innerHTML = exWords.map((w, i) =>
+        i < exHintIdx
+            ? `<span class="hint-word revealed">${escHtml(w)}</span>`
+            : `<span class="hint-word">${'·'.repeat(Math.min(w.length, 5))}</span>`
+    ).join(' ');
+}
+
+function revealAnswer() {
+    const ex = exExamples[exCursor];
+    document.getElementById('answerSentence').textContent = ex.sentence;
+    document.getElementById('answerWord').textContent = exWord;
+    document.getElementById('answerPhonetic').textContent = exPhonetic;
+    document.getElementById('exerciseAnswer').style.display = '';
+    const isLast = exCursor >= exExamples.length - 1;
+    document.getElementById('exNextBtn').style.display = isLast ? 'none' : '';
+    if (isLast) {
+        document.getElementById('ratingArea').style.setProperty('display', 'flex', 'important');
+    }
+}
+
+function exNext() {
+    exCursor++;
+    renderExercise();
+}
+
 function flipCard() {
     if (flipped) return;
+    if (EXERCISE_TYPES.has(currentRecord?.contentType)) return;
     flipped = true;
     document.getElementById('flipCard').classList.add('flipped');
     document.getElementById('ratingArea').style.setProperty('display', 'flex', 'important');

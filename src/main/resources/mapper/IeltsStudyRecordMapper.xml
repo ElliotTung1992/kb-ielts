@@ -51,31 +51,21 @@
             sr.content_type,
             sr.content_id,
             'REVIEW'        AS study_mode,
-            COALESCE(
-                w.word,
-                p.phrase,
-                par.group_name,
-                pp.title,
-                gp.title,
-                LEFT(ge.question, 80),
-                st.title,
-                li.title,
-                ri.title,
-                wt.title
-            )               AS summary
+            COALESCE(w.word, p.phrase, par.group_name) AS summary
         FROM ielts_study_records sr
-        LEFT JOIN ielts_words               w   ON sr.content_type = 'WORD'             AND sr.content_id = w.id
-        LEFT JOIN ielts_phrases             p   ON sr.content_type = 'PHRASE'           AND sr.content_id = p.id
-        LEFT JOIN ielts_paraphrase_groups   par ON sr.content_type = 'PARAPHRASE'       AND sr.content_id = par.id
-        LEFT JOIN ielts_pronunciation_points pp ON sr.content_type = 'PRONUNCIATION'    AND sr.content_id = pp.id
-        LEFT JOIN ielts_grammar_points      gp  ON sr.content_type = 'GRAMMAR_POINT'    AND sr.content_id = gp.id
-        LEFT JOIN ielts_grammar_exercises   ge  ON sr.content_type = 'GRAMMAR_EXERCISE' AND sr.content_id = ge.id
-        LEFT JOIN ielts_speaking_topics     st  ON sr.content_type = 'SPEAKING'         AND sr.content_id = st.id
-        LEFT JOIN ielts_listening_items     li  ON sr.content_type = 'LISTENING'        AND sr.content_id = li.id
-        LEFT JOIN ielts_reading_items       ri  ON sr.content_type = 'READING'          AND sr.content_id = ri.id
-        LEFT JOIN ielts_writing_tasks       wt  ON sr.content_type = 'WRITING'          AND sr.content_id = wt.id
+        LEFT JOIN ielts_words             w   ON sr.content_type = 'WORD'       AND sr.content_id = w.id
+        LEFT JOIN ielts_phrases           p   ON sr.content_type = 'PHRASE'     AND sr.content_id = p.id
+        LEFT JOIN ielts_paraphrase_groups par ON sr.content_type = 'PARAPHRASE' AND sr.content_id = par.id
         WHERE sr.next_review_at &lt;= #{today}
           AND sr.status != 'MASTERED'
+          AND sr.content_type IN ('WORD', 'PHRASE', 'PARAPHRASE')
+          AND NOT (
+              sr.content_type = 'WORD'
+              AND NOT EXISTS (
+                  SELECT 1 FROM ielts_examples e
+                  WHERE e.content_type = 'WORD' AND e.content_id = sr.content_id
+              )
+          )
         ORDER BY sr.next_review_at
     </select>
 
