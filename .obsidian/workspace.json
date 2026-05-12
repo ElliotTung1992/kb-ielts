@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "b2f49f5b6a51247e",
+        "id": "1cc8d49571fd0c3d",
         "type": "tabs",
         "children": [
           {
-            "id": "c818180a895c9267",
+            "id": "24718cc4412884ab",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -176,8 +176,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "c818180a895c9267",
+  "active": "24718cc4412884ab",
   "lastOpenFiles": [
+    "docs/plan/todolist.md",
+    "target/classes/com/enterprise/kb/ielts/service/impl/IeltsStudyServiceImpl.class",
     "wiki/sources/prd-word-exercise-mode.md",
     "wiki/sources/plan-2026-05-12-word-exercise.md",
     "target/surefire/surefirebooter-20260512113105727_3.jar",
@@ -189,13 +191,11 @@
     "target/surefire/surefire-20260512113056286_1tmp",
     "target/test-classes/com/enterprise/kb/ielts/study/SpacedRepetitionCalculatorTest.class",
     "target/test-classes/com/enterprise/kb/ielts/service/IeltsStudyServiceImplTest.class",
-    "target/test-classes/com/enterprise/kb/ielts/controller/IeltsStudyControllerValidationTest.class",
     "docs/plan/prd-word-exercise-mode.md",
     "wiki/sources/plan-2026-0508.md",
     "wiki/sources/todolist.md",
     "wiki/sources/plan-2026-0506.md",
     "wiki/sources/plan-IELTS.md",
-    "docs/plan/todolist.md",
     "docs/plan/plan-IELTS.md",
     "docs/plan/plan-2026-0508.md",
     "docs/plan/plan-2026-0506.md",
